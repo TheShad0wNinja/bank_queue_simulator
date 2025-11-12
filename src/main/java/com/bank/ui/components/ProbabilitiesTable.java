@@ -27,11 +27,10 @@ public class ProbabilitiesTable extends JPanel {
     public ProbabilitiesTable() {
         setLayout(new BorderLayout(0, 10));
         setBackground(Theme.PANEL_BG);
-        setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+//        setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        // Set a minimum and preferred size so the table doesn't get squashed
-        setPreferredSize(new Dimension(500, 600));
-        setMinimumSize(new Dimension(500, 600));
+        setPreferredSize(new Dimension(100, 400));
+        setMinimumSize(new Dimension(100, 300));
 
         String[] columnNames = {"Value", "Probability", "Cumulative Probability"};
 
