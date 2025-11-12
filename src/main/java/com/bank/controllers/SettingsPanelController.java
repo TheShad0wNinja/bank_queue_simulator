@@ -1,6 +1,7 @@
 package com.bank.controllers;
 
 import com.bank.models.Employee;
+import com.bank.simulation.SimulationConfigs;
 import com.bank.ui.pages.SettingsPanel;
 
 import javax.swing.*;
@@ -11,40 +12,40 @@ import java.util.Map;
 
 public class SettingsPanelController {
     private final SettingsPanel view;
-    private final Parameters parameters;
+    private final SimulationConfigs simulationConfigs;
 
     public SettingsPanelController(SettingsPanel view) {
         this.view = view;
-        this.parameters = Parameters.instance;
+        this.simulationConfigs = SimulationConfigs.instance;
 
         setupActions();
         loadParams();
     }
 
     public void loadParams() {
-        view.setGeneralConfigField("outdoorQueueSize", String.valueOf(parameters.getOutdoorQueueCapacity()));
-        view.setGeneralConfigField("cashCustomerProp", String.valueOf(parameters.getCashCustomerProbability()));
-        view.setGeneralConfigField("numOutdoorTellers", String.valueOf(parameters.getOutdoorCashEmployees().size()));
-        view.setGeneralConfigField("numIndoorTellers", String.valueOf(parameters.getIndoorCashEmployees().size()));
-        view.setGeneralConfigField("numIndoorServiceEmp", String.valueOf(parameters.getIndoorServiceEmployees().size()));
+        view.setGeneralConfigField("outdoorQueueSize", String.valueOf(simulationConfigs.getOutdoorQueueCapacity()));
+        view.setGeneralConfigField("cashCustomerProp", String.valueOf(simulationConfigs.getCashCustomerProbability()));
+        view.setGeneralConfigField("numOutdoorTellers", String.valueOf(simulationConfigs.getOutdoorCashEmployees().size()));
+        view.setGeneralConfigField("numIndoorTellers", String.valueOf(simulationConfigs.getIndoorCashEmployees().size()));
+        view.setGeneralConfigField("numIndoorServiceEmp", String.valueOf(simulationConfigs.getIndoorServiceEmployees().size()));
 
 
         view.clearTables();
 
-        view.setTimeBetweenArrivalsTable(parameters.getTimeBetweenArrivalProbability());
+        view.setTimeBetweenArrivalsTable(simulationConfigs.getTimeBetweenArrivalProbability());
 
         int outdoorTellerCount = 0;
-        for (Employee employee : parameters.getOutdoorCashEmployees()) {
+        for (Employee employee : simulationConfigs.getOutdoorCashEmployees()) {
             view.addEmployeeTable("outdoor_teller_" + outdoorTellerCount++, employee);
         }
 
         int indoorTellerCount = 0;
-        for (Employee employee : parameters.getIndoorCashEmployees()) {
+        for (Employee employee : simulationConfigs.getIndoorCashEmployees()) {
             view.addEmployeeTable("indoor_teller_" + indoorTellerCount++, employee);
         }
 
         int indoorServiceCount = 0;
-        for (Employee employee : parameters.getIndoorServiceEmployees()) {
+        for (Employee employee : simulationConfigs.getIndoorServiceEmployees()) {
             view.addEmployeeTable("indoor_service_" + indoorServiceCount++, employee);
         }
     }
@@ -63,10 +64,10 @@ public class SettingsPanelController {
                 return;
             }
 
-            parameters.setOutdoorQueueCapacity(outdoorQueueSize);
-            parameters.setCashCustomerProbability(cashCustomerProp);
+            simulationConfigs.setOutdoorQueueCapacity(outdoorQueueSize);
+            simulationConfigs.setCashCustomerProbability(cashCustomerProp);
 
-            parameters.setTimeBetweenArrivalProbability(extractProbabilitiesFromTable(view.getTimeBetweenArrivalsTable().getTableData()));
+            simulationConfigs.setTimeBetweenArrivalProbability(extractProbabilitiesFromTable(view.getTimeBetweenArrivalsTable().getTableData()));
 
             List<Employee> newEmployees = new ArrayList<>();
 
@@ -117,7 +118,7 @@ public class SettingsPanelController {
                 ));
             }
 
-            parameters.setEmployees(newEmployees);
+            simulationConfigs.setEmployees(newEmployees);
 
             showSuccess("Settings saved successfully!");
 
@@ -133,7 +134,7 @@ public class SettingsPanelController {
         int confirm = JOptionPane.showConfirmDialog(view, "Are you sure you want to reset all settings to default?", "Confirm Reset", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            parameters.resetParamsToDefault();
+            simulationConfigs.resetParamsToDefault();
             loadParams();
             showSuccess("Settings reset to defaults");
         }

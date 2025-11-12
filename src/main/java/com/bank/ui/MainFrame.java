@@ -12,7 +12,7 @@ public class MainFrame extends JFrame {
     private final JPanel contentPanel;
     private final CardLayout cardLayout;
     private final HashMap<String, JPanel> panels = new HashMap<>();
-    private final String defaultPage = "dashboard";
+    private final String defaultPage = "simulation";
 
     public MainFrame() {
         setTitle("BankQueue Sim");
@@ -26,22 +26,22 @@ public class MainFrame extends JFrame {
         contentPanel = new JPanel(cardLayout);
         contentPanel.setBackground(Theme.BACKGROUND);
 
-        DashboardPanel dashboardPanel = new DashboardPanel();
+        SimulationPanel simulationPanel = new SimulationPanel();
         HistoryPanel historyPanel = new HistoryPanel();
         SettingsPanel settingsPanel = new SettingsPanel();
 
-        panels.put("dashboard", dashboardPanel);
+        panels.put("simulation", simulationPanel);
         panels.put("history", historyPanel);
         panels.put("settings", settingsPanel);
 
-        contentPanel.add(dashboardPanel, "dashboard");
+        contentPanel.add(simulationPanel, "simulation");
         contentPanel.add(historyPanel, "history");
         contentPanel.add(settingsPanel, "settings");
         add(contentPanel, BorderLayout.CENTER);
 
         showPanel(defaultPage);
 
-        MainSideNav sideNav = new MainSideNav(new String[]{"dashboard", "history", "settings"}, defaultPage);
+        MainSideNav sideNav = new MainSideNav(new String[]{"simulation", "history", "settings"}, defaultPage);
         sideNav.setOnSelect(this::showPanel);
 
         add(sideNav, BorderLayout.WEST);

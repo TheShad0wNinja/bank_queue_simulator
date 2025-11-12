@@ -1,4 +1,4 @@
-package com.bank.controllers;
+package com.bank.simulation;
 
 import com.bank.models.Employee;
 import com.bank.models.Range;
@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-public class Parameters {
-    public static Parameters instance = new Parameters();
+public class SimulationConfigs {
+    public static SimulationConfigs instance = new SimulationConfigs();
 
     private int outdoorQueueCapacity;
     private int indoorQueueCapacity;
@@ -19,7 +19,7 @@ public class Parameters {
     private Map<Integer, Double> timeBetweenArrivalProbability;
     private List<Employee> employees;
 
-    private Parameters() {
+    private SimulationConfigs() {
         resetParamsToDefault();
     }
 
