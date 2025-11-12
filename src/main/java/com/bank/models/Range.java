@@ -1,6 +1,6 @@
 package com.bank.models;
 
-public record Range(double low, double high, double value) {
+public record Range(double low, double high, int value) {
     public Range {
         if (low > high) {
             throw new IllegalArgumentException("`low` can't be > than `high`");

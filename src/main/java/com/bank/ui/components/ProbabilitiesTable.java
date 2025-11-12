@@ -10,6 +10,7 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
 import java.util.ArrayList;
+import java.util.Map;
 
 public class ProbabilitiesTable extends JPanel {
     private final JTable table;
@@ -18,10 +19,11 @@ public class ProbabilitiesTable extends JPanel {
     public ProbabilitiesTable(Employee employee) {
         this();
 
-        ArrayList<Range> probabilities = employee.getServiceTimeProbabilities();
-        for(Range range : probabilities) {
-            tableModel.addRow(new Object[]{range.low(), range.high(), ""});
+        Map<Integer, Double> probabilities = employee.getServiceTimeProbabilities();
+        for(var entry : probabilities.entrySet()) {
+            tableModel.addRow(new Object[]{entry.getKey(), entry.getValue(), ""});
         }
+        updateCumulativeProbabilities();
     }
 
     public ProbabilitiesTable() {
@@ -29,8 +31,8 @@ public class ProbabilitiesTable extends JPanel {
         setBackground(Theme.PANEL_BG);
 //        setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
-        setPreferredSize(new Dimension(100, 400));
-        setMinimumSize(new Dimension(100, 300));
+        setPreferredSize(new Dimension(100, 250));
+        setMinimumSize(new Dimension(100, 250));
 
         String[] columnNames = {"Value", "Probability", "Cumulative Probability"};
 
@@ -53,9 +55,18 @@ public class ProbabilitiesTable extends JPanel {
                         updateCumulativeProbabilities();
                         return;
                     } catch (NumberFormatException e) {
-                        // Invalid input, ignore
                         return;
                     }
+                } else if (column == 0) {
+                    try {
+                        double value = Double.parseDouble(aValue.toString());
+                        super.setValueAt(Math.floor(value), row, column);
+                        updateCumulativeProbabilities();
+                        return;
+                    } catch (NumberFormatException e) {
+                        return;
+                    }
+
                 }
                 super.setValueAt(aValue, row, column);
             }

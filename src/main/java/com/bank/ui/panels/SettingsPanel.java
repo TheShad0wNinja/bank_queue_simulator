@@ -4,6 +4,7 @@ import com.bank.controllers.SettingsPanelController;
 import com.bank.models.Employee;
 import com.bank.ui.Theme;
 import com.bank.ui.components.*;
+import com.bank.utils.TextUtils;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,8 +13,9 @@ import java.util.Map;
 
 public class SettingsPanel extends JPanel {
     private final Map<String, JTextField> generalConfigs = new HashMap<>();
-    private static final String[][] generalConfigLabels = new String[][] {
+    private static final String[][] generalConfigLabels = new String[][]{
             {"outdoorQueueSize", "Outdoor Queue Size"},
+            {"cashCustomerProp", "Probability of Cash Customer"},
             {"numOutdoorTellers", "Number of Outdoor Tellers"},
             {"numIndoorTellers", "Number of Indoor Tellers"},
             {"numIndoorServiceEmp", "Number of Indoor Service Employees"},
@@ -203,14 +205,12 @@ public class SettingsPanel extends JPanel {
             wrapper.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
             wrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, 700));
 
-            // Add label for employee type
             JPanel labelPanel = new JPanel(new BorderLayout());
             labelPanel.setBackground(Theme.PANEL_BG);
             labelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
 
-            String employeeLabel = String.format("%s %s Employee",
-                    employee.getArea().toString(),
-                    employee.getType().toString());
+            String employeeLabel = TextUtils.capitalize(String.join(" ", employeeKey.split("_")));
+
             JLabel label = new JLabel(employeeLabel);
             label.setFont(Theme.DEFAULT_FONT.deriveFont(Font.BOLD, 16f));
             label.setForeground(Theme.TEXT_PRIMARY);
@@ -218,7 +218,6 @@ public class SettingsPanel extends JPanel {
 
             wrapper.add(labelPanel, BorderLayout.NORTH);
 
-            // Add the table
             ProbabilitiesTable table = new ProbabilitiesTable(employee);
             employeeTables.put(employeeKey, table);
             wrapper.add(table, BorderLayout.CENTER);
@@ -228,10 +227,6 @@ public class SettingsPanel extends JPanel {
 
         tablesPanel.revalidate();
         tablesPanel.repaint();
-    }
-
-    public ProbabilitiesTable getEmployeeTable(String employeeKey) {
-        return employeeTables.get(employeeKey);
     }
 
     public Map<String, ProbabilitiesTable> getAllEmployeeTables() {
