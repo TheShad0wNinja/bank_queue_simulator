@@ -16,10 +16,9 @@ public class ProbabilitiesTable extends JPanel {
     private final JTable table;
     private final DefaultTableModel tableModel;
 
-    public ProbabilitiesTable(Employee employee) {
+    public ProbabilitiesTable(Map<Integer, Double> probabilities) {
         this();
 
-        Map<Integer, Double> probabilities = employee.getServiceTimeProbabilities();
         for(var entry : probabilities.entrySet()) {
             tableModel.addRow(new Object[]{entry.getKey(), entry.getValue(), ""});
         }

@@ -8,6 +8,7 @@ import com.bank.utils.TextUtils;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,6 +24,7 @@ public class SettingsPanel extends JPanel {
 
     private JPanel tablesPanel;
     private final Map<String, ProbabilitiesTable> employeeTables = new HashMap<>();
+    private ProbabilitiesTable timeBetweenArrivalsTable;
 
     private JButton saveBtn;
     private JButton resetBtn;
@@ -162,7 +164,7 @@ public class SettingsPanel extends JPanel {
         c.gridx = 0;
         c.gridy = 0;
         c.insets = new Insets(10, 20, 0, 20);
-        JLabel title = new JLabel("Employee Service Time Distributions");
+        JLabel title = new JLabel("Service Time Distributions");
         title.setFont(Theme.TITLE_FONT);
         panel.add(title, c);
 
@@ -191,42 +193,64 @@ public class SettingsPanel extends JPanel {
         return field != null ? field.getText() : "";
     }
 
-    public void clearEmployeeTables() {
+    public void clearTables() {
         employeeTables.clear();
+        timeBetweenArrivalsTable = null;
         tablesPanel.removeAll();
         tablesPanel.revalidate();
         tablesPanel.repaint();
     }
 
+    public void setTimeBetweenArrivalsTable(Map<Integer, Double> probabilities) {
+        timeBetweenArrivalsTable = addProbabilityTable("Time Between Arrivals", probabilities);
+    }
+
+    private ProbabilitiesTable addProbabilityTable(String labelText, Map<Integer, Double> probabilities) {
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.setBackground(Theme.PANEL_BG);
+        wrapper.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        wrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, 700));
+
+        JPanel labelPanel = new JPanel(new BorderLayout());
+        labelPanel.setBackground(Theme.PANEL_BG);
+        labelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+
+        JLabel label = new JLabel(labelText);
+        label.setFont(Theme.DEFAULT_FONT.deriveFont(Font.BOLD, 16f));
+        label.setForeground(Theme.TEXT_PRIMARY);
+        labelPanel.add(label, BorderLayout.WEST);
+
+        wrapper.add(labelPanel, BorderLayout.NORTH);
+
+        ProbabilitiesTable table = new ProbabilitiesTable(probabilities);
+        wrapper.add(table, BorderLayout.CENTER);
+
+        tablesPanel.add(wrapper);
+        tablesPanel.revalidate();
+
+        return table;
+    }
+
     public void addEmployeeTable(String employeeKey, Employee employee) {
         if (!employeeTables.containsKey(employeeKey)) {
-            JPanel wrapper = new JPanel(new BorderLayout());
-            wrapper.setBackground(Theme.PANEL_BG);
-            wrapper.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-            wrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, 700));
+            String employeeLabel = TextUtils.capitalize(
+                    String.join(" ",
+                            Arrays.stream(employeeKey.split("_"))
+                                    .map(str ->
+                                            str.matches("-?\\d+(\\.\\d+)?")
+                                                    ? String.valueOf(Integer.parseInt(str) + 1)
+                                                    : str
+                                    ).toList()));
 
-            JPanel labelPanel = new JPanel(new BorderLayout());
-            labelPanel.setBackground(Theme.PANEL_BG);
-            labelPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
-
-            String employeeLabel = TextUtils.capitalize(String.join(" ", employeeKey.split("_")));
-
-            JLabel label = new JLabel(employeeLabel);
-            label.setFont(Theme.DEFAULT_FONT.deriveFont(Font.BOLD, 16f));
-            label.setForeground(Theme.TEXT_PRIMARY);
-            labelPanel.add(label, BorderLayout.WEST);
-
-            wrapper.add(labelPanel, BorderLayout.NORTH);
-
-            ProbabilitiesTable table = new ProbabilitiesTable(employee);
-            employeeTables.put(employeeKey, table);
-            wrapper.add(table, BorderLayout.CENTER);
-
-            tablesPanel.add(wrapper);
+            employeeTables.put(employeeKey, addProbabilityTable(employeeLabel, employee.getServiceTimeProbabilities()));
         }
 
         tablesPanel.revalidate();
         tablesPanel.repaint();
+    }
+
+    public ProbabilitiesTable getTimeBetweenArrivalsTable() {
+        return timeBetweenArrivalsTable;
     }
 
     public Map<String, ProbabilitiesTable> getAllEmployeeTables() {

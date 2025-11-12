@@ -12,7 +12,7 @@ public class Parameters {
     private int outdoorQueueCapacity;
     private int indoorQueueCapacity;
     private double cashCustomerProbability;
-//    private ArrayList<Range> timeBetweenArrivalProbability;
+    private ArrayList<Range> timeBetweenArrivalRanges;
     private Map<Integer, Double> timeBetweenArrivalProbability;
     private List<Employee> employees;
 
@@ -29,8 +29,9 @@ public class Parameters {
                 0, 0.15,
                 1, 0.25,
                 2, 0.25,
-                3, 0.45
+                3, 0.35
         ));
+        updateTimeBetweenArrivalRanges();
 
         employees = new ArrayList<>();
         Employee outdoorTeller = new Employee(
@@ -99,14 +100,6 @@ public class Parameters {
         return (1 - cashCustomerProbability);
     }
 
-//    public ArrayList<Range> getTimeBetweenArrivalProbability() {
-//        return timeBetweenArrivalProbability;
-//    }
-//
-//    public void setTimeBetweenArrivalProbability(ArrayList<Range> timeBetweenArrivalProbability) {
-//        this.timeBetweenArrivalProbability = timeBetweenArrivalProbability;
-//    }
-
     public List<Employee> getIndoorServiceEmployees() {
         return employees
                 .stream()
@@ -128,11 +121,33 @@ public class Parameters {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-//    public double getTimeBetweenArrivalTime(double probability) {
-//        return timeBetweenArrivalProbability.stream()
-//                .filter(range -> range.contains(probability))
-//                .findFirst()
-//                .map(Range::value)
-//                .orElseThrow();
-//    }
+    public Map<Integer, Double> getTimeBetweenArrivalProbability() {
+        return timeBetweenArrivalProbability;
+    }
+
+    public void setTimeBetweenArrivalProbability(Map<Integer, Double> timeBetweenArrivalProbability) {
+        this.timeBetweenArrivalProbability = timeBetweenArrivalProbability;
+        updateTimeBetweenArrivalRanges();
+    }
+
+    private void updateTimeBetweenArrivalRanges() {
+        timeBetweenArrivalRanges = new ArrayList<>();
+        double lastProbability = 0.0;
+        for (var entry : timeBetweenArrivalProbability.entrySet()) {
+            // No need to add onto the last probability because it'll be avoided due to findFirst being used
+            timeBetweenArrivalRanges.add(new Range(lastProbability , lastProbability + entry.getValue(), entry.getKey()));
+            lastProbability += entry.getValue();
+        }
+
+        if (lastProbability > 1)
+            throw new ArithmeticException("Time between arrivals probabilities are out of range");
+    }
+
+    public double getTimeBetweenArrival(double probability) {
+        return timeBetweenArrivalRanges.stream()
+                .filter(range -> range.contains(probability))
+                .findFirst()
+                .map(Range::value)
+                .orElseThrow();
+    }
 }

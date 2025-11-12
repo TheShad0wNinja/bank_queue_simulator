@@ -2,7 +2,6 @@ package com.bank.controllers;
 
 import com.bank.models.Employee;
 import com.bank.models.Parameters;
-import com.bank.models.Range;
 import com.bank.ui.panels.SettingsPanel;
 
 import javax.swing.*;
@@ -30,7 +29,10 @@ public class SettingsPanelController {
         view.setGeneralConfigField("numIndoorTellers", String.valueOf(parameters.getIndoorCashEmployees().size()));
         view.setGeneralConfigField("numIndoorServiceEmp", String.valueOf(parameters.getIndoorServiceEmployees().size()));
 
-        view.clearEmployeeTables();
+
+        view.clearTables();
+
+        view.setTimeBetweenArrivalsTable(parameters.getTimeBetweenArrivalProbability());
 
         int outdoorTellerCount = 0;
         for (Employee employee : parameters.getOutdoorCashEmployees()) {
@@ -64,6 +66,8 @@ public class SettingsPanelController {
 
             parameters.setOutdoorQueueCapacity(outdoorQueueSize);
             parameters.setCashCustomerProbability(cashCustomerProp);
+
+            parameters.setTimeBetweenArrivalProbability(extractProbabilitiesFromTable(view.getTimeBetweenArrivalsTable().getTableData()));
 
             List<Employee> newEmployees = new ArrayList<>();
 
