@@ -1,4 +1,4 @@
-package com.bank.ui.panels;
+package com.bank.ui.pages;
 
 import com.bank.controllers.SettingsPanelController;
 import com.bank.models.Employee;

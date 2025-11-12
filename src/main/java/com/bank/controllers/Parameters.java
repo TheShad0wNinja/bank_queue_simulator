@@ -1,4 +1,7 @@
-package com.bank.models;
+package com.bank.controllers;
+
+import com.bank.models.Employee;
+import com.bank.models.Range;
 
 import java.util.ArrayList;
 import java.util.HashMap;

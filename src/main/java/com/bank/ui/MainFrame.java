@@ -1,18 +1,18 @@
 package com.bank.ui;
 
 import com.bank.ui.components.*;
-import com.bank.ui.panels.*;
+import com.bank.ui.pages.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
-import java.util.Map;
 
 public class MainFrame extends JFrame {
 
     private final JPanel contentPanel;
     private final CardLayout cardLayout;
     private final HashMap<String, JPanel> panels = new HashMap<>();
+    private final String defaultPage = "dashboard";
 
     public MainFrame() {
         setTitle("BankQueue Sim");
@@ -37,11 +37,11 @@ public class MainFrame extends JFrame {
         contentPanel.add(dashboardPanel, "dashboard");
         contentPanel.add(historyPanel, "history");
         contentPanel.add(settingsPanel, "settings");
-
-        showPanel("settings");
         add(contentPanel, BorderLayout.CENTER);
 
-        MainSideNav sideNav = new MainSideNav(new String[]{"dashboard", "history", "settings"}, "settings");
+        showPanel(defaultPage);
+
+        MainSideNav sideNav = new MainSideNav(new String[]{"dashboard", "history", "settings"}, defaultPage);
         sideNav.setOnSelect(this::showPanel);
 
         add(sideNav, BorderLayout.WEST);

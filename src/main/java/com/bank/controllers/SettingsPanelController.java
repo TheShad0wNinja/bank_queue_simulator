@@ -1,8 +1,7 @@
 package com.bank.controllers;
 
 import com.bank.models.Employee;
-import com.bank.models.Parameters;
-import com.bank.ui.panels.SettingsPanel;
+import com.bank.ui.pages.SettingsPanel;
 
 import javax.swing.*;
 import java.util.ArrayList;

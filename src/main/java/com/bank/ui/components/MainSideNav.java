@@ -1,9 +1,6 @@
 package com.bank.ui.components;
 
 import com.bank.ui.Theme;
-import com.bank.ui.panels.DashboardPanel;
-import com.bank.ui.panels.HistoryPanel;
-import com.bank.ui.panels.SettingsPanel;
 
 import javax.swing.*;
 import java.awt.*;
@@ -30,7 +27,7 @@ public class MainSideNav extends ThemePanel {
         c.weighty = 0.0;
         c.gridx = 0;
         c.gridy = 0;
-        JLabel logo = new JLabel("Bank Simulator");
+        JLabel logo = new JLabel("Bank Queue Sim");
         logo.setFont(Theme.TITLE_FONT);
         c.insets = new Insets(10, 20, 10, 20);
         add(logo, c);

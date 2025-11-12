@@ -1,4 +1,4 @@
-package com.bank.ui.panels;
+package com.bank.ui.pages;
 
 import com.bank.ui.Theme;
 
