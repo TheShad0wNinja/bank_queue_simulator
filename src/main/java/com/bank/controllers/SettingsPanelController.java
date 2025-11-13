@@ -5,50 +5,47 @@ import com.bank.simulation.SimulationConfigs;
 import com.bank.ui.pages.SettingsPanel;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.bank.models.ServiceType.CASH;
 import static com.bank.models.ServiceType.SERVICE;
 
 public class SettingsPanelController {
     private final SettingsPanel view;
-    private final SimulationConfigs simulationConfigs;
+    private final SimulationConfigs configs;
 
     public SettingsPanelController(SettingsPanel view) {
         this.view = view;
-        this.simulationConfigs = SimulationConfigs.instance;
+        this.configs = SimulationConfigs.instance;
 
         setupActions();
         loadParams();
     }
 
     public void loadParams() {
-        view.setGeneralConfigField("outdoorQueueSize", String.valueOf(simulationConfigs.getOutdoorQueueCapacity()));
-        view.setGeneralConfigField("cashCustomerProp", String.valueOf(simulationConfigs.getCashCustomerProbability()));
-        view.setGeneralConfigField("numOutdoorTellers", String.valueOf(simulationConfigs.getOutdoorCashEmployees().size()));
-        view.setGeneralConfigField("numIndoorTellers", String.valueOf(simulationConfigs.getIndoorCashEmployees().size()));
-        view.setGeneralConfigField("numIndoorServiceEmp", String.valueOf(simulationConfigs.getIndoorServiceEmployees().size()));
+        view.setGeneralConfigField("outdoorQueueSize", String.valueOf(configs.getOutdoorQueueCapacity()));
+        view.setGeneralConfigField("cashCustomerProp", String.valueOf(configs.getCashCustomerProbability()));
+        view.setGeneralConfigField("numOutdoorTellers", String.valueOf(configs.getOutdoorCashEmployees().size()));
+        view.setGeneralConfigField("numIndoorTellers", String.valueOf(configs.getIndoorCashEmployees().size()));
+        view.setGeneralConfigField("numIndoorServiceEmp", String.valueOf(configs.getIndoorServiceEmployees().size()));
 
 
         view.clearTables();
 
-        view.setTimeBetweenArrivalsTable(simulationConfigs.getTimeBetweenArrivalProbability());
+        view.setTimeBetweenArrivalsTable(configs.getTimeBetweenArrivalProbability());
 
         int outdoorTellerCount = 0;
-        for (EmployeeData employeeData : simulationConfigs.getOutdoorCashEmployees()) {
+        for (EmployeeData employeeData : configs.getOutdoorCashEmployees()) {
             view.addEmployeeTable("outdoor_teller_" + outdoorTellerCount++, employeeData);
         }
 
         int indoorTellerCount = 0;
-        for (EmployeeData employeeData : simulationConfigs.getIndoorCashEmployees()) {
+        for (EmployeeData employeeData : configs.getIndoorCashEmployees()) {
             view.addEmployeeTable("indoor_teller_" + indoorTellerCount++, employeeData);
         }
 
         int indoorServiceCount = 0;
-        for (EmployeeData employeeData : simulationConfigs.getIndoorServiceEmployees()) {
+        for (EmployeeData employeeData : configs.getIndoorServiceEmployees()) {
             view.addEmployeeTable("indoor_service_" + indoorServiceCount++, employeeData);
         }
     }
@@ -67,10 +64,10 @@ public class SettingsPanelController {
                 return;
             }
 
-            simulationConfigs.setOutdoorQueueCapacity(outdoorQueueSize);
-            simulationConfigs.setCashCustomerProbability(cashCustomerProp);
+            configs.setOutdoorQueueCapacity(outdoorQueueSize);
+            configs.setCashCustomerProbability(cashCustomerProp);
 
-            simulationConfigs.setTimeBetweenArrivalProbability(extractProbabilitiesFromTable(view.getTimeBetweenArrivalsTable().getTableData()));
+            configs.setTimeBetweenArrivalProbability(extractProbabilitiesFromTable(view.getTimeBetweenArrivalsTable().getTableData()));
 
             List<EmployeeData> newEmployeeData = new ArrayList<>();
 
@@ -79,7 +76,7 @@ public class SettingsPanelController {
             for (int i = 0; i < numOutdoorTellers; i++) {
                 String key = "outdoor_teller_" + i;
 
-                Map<Integer, Double> serviceTimes = new HashMap<>(Map.of(0, 1.0));
+                Map<Integer, Double> serviceTimes = configs.getDefaultTellerProbability();
                 if (tables.containsKey(key)) {
                     serviceTimes = extractProbabilitiesFromTable(tables.get(key).getTableData());
                 }
@@ -87,6 +84,7 @@ public class SettingsPanelController {
                 newEmployeeData.add(new EmployeeData(
                         EmployeeData.Area.OUTDOOR,
                         CASH,
+                        key,
                         serviceTimes
                 ));
             }
@@ -94,7 +92,7 @@ public class SettingsPanelController {
             for (int i = 0; i < numIndoorTellers; i++) {
                 String key = "indoor_teller_" + i;
 
-                Map<Integer, Double> serviceTimes = new HashMap<>(Map.of(0, 1.0));
+                Map<Integer, Double> serviceTimes = configs.getDefaultTellerProbability();
                 if (tables.containsKey(key)) {
                     serviceTimes = extractProbabilitiesFromTable(tables.get(key).getTableData());
                 }
@@ -102,6 +100,7 @@ public class SettingsPanelController {
                 newEmployeeData.add(new EmployeeData(
                         EmployeeData.Area.INDOOR,
                         CASH,
+                        key,
                         serviceTimes
                 ));
             }
@@ -109,7 +108,7 @@ public class SettingsPanelController {
             for (int i = 0; i < numIndoorServiceEmp; i++) {
                 String key = "indoor_service_" + i;
 
-                Map<Integer, Double> serviceTimes = new HashMap<>(Map.of(0, 1.0));
+                Map<Integer, Double> serviceTimes = configs.getDefaultServiceEmployeeProbability();
                 if (tables.containsKey(key)) {
                     serviceTimes = extractProbabilitiesFromTable(tables.get(key).getTableData());
                 }
@@ -117,11 +116,12 @@ public class SettingsPanelController {
                 newEmployeeData.add(new EmployeeData(
                         EmployeeData.Area.INDOOR,
                         SERVICE,
+                        key,
                         serviceTimes
                 ));
             }
 
-            simulationConfigs.setEmployees(newEmployeeData);
+            configs.setEmployees(newEmployeeData);
 
             showSuccess("Settings saved successfully!");
 
@@ -137,7 +137,7 @@ public class SettingsPanelController {
         int confirm = JOptionPane.showConfirmDialog(view, "Are you sure you want to reset all settings to default?", "Confirm Reset", JOptionPane.YES_NO_OPTION);
 
         if (confirm == JOptionPane.YES_OPTION) {
-            simulationConfigs.resetParamsToDefault();
+            configs.resetParamsToDefault();
             loadParams();
             showSuccess("Settings reset to defaults");
         }
@@ -149,7 +149,7 @@ public class SettingsPanelController {
     }
 
     private Map<Integer, Double> extractProbabilitiesFromTable(Object[][] tableData) {
-        Map<Integer, Double> probabilities = new HashMap<>();
+        Map<Integer, Double> probabilities = new LinkedHashMap<>();
 
         for (Object[] row : tableData) {
             if (row[0] == null || row[1] == null) continue;

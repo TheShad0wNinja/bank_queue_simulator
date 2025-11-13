@@ -3,10 +3,7 @@ package com.bank.simulation;
 import com.bank.models.EmployeeData;
 import com.bank.models.Range;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.bank.models.ServiceType.CASH;
@@ -43,35 +40,42 @@ public class SimulationConfigs {
         EmployeeData outdoorTeller = new EmployeeData(
                 EmployeeData.Area.OUTDOOR,
                 CASH,
-                new HashMap<>(Map.of(
-                        2, 0.2,
-                        3, 0.3,
-                        4, 0.5
-                ))
+                "outdoor_teller_1",
+                getDefaultTellerProbability()
         );
         EmployeeData indoorTeller = new EmployeeData(
                 EmployeeData.Area.INDOOR,
                 CASH,
-                new HashMap<>(Map.of(
-                        2, 0.2,
-                        3, 0.3,
-                        4, 0.5
-                ))
+                "indoor_teller_1",
+                getDefaultTellerProbability()
         );
 
         EmployeeData indoorServiceEmployeeData = new EmployeeData(
                 EmployeeData.Area.INDOOR,
                 SERVICE,
-                new HashMap<>(Map.of(
-                        4, 0.2,
-                        6, 0.5,
-                        8, 0.3
-                ))
+                "indoor_service_1",
+                getDefaultServiceEmployeeProbability()
         );
 
         employeeData.add(outdoorTeller);
         employeeData.add(indoorTeller);
         employeeData.add(indoorServiceEmployeeData);
+    }
+
+    public Map<Integer, Double> getDefaultTellerProbability() {
+        return new LinkedHashMap<>() {{
+            put(2, 0.2);
+            put(3, 0.3);
+            put(4, 0.5);
+        }};
+    }
+
+    public Map<Integer, Double> getDefaultServiceEmployeeProbability() {
+        return new LinkedHashMap<>() {{
+            put(4, 0.2);
+            put(6, 0.5);
+            put(8, 0.3);
+        }};
     }
 
     public int getIndoorQueueCapacity() {

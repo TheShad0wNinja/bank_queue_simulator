@@ -10,17 +10,19 @@ public class EmployeeData {
 
     private final Area area;
     private final ServiceType type;
+    private final String id;
 
     private ArrayList<Range> serviceTimeRanges;
     private Map<Integer, Double> serviceTimeProbabilities;
 
-    public EmployeeData(Area area, ServiceType type) {
+    public EmployeeData(Area area, ServiceType type, String id) {
         this.area = area;
         this.type = type;
+        this.id = id;
     }
 
-    public EmployeeData(Area area, ServiceType type, Map<Integer, Double> serviceTimeProbabilities) {
-        this(area, type);
+    public EmployeeData(Area area, ServiceType type, String id, Map<Integer, Double> serviceTimeProbabilities) {
+        this(area, type, id);
         this.serviceTimeProbabilities = serviceTimeProbabilities;
         updateServiceTimeRanges();
     }
@@ -31,6 +33,10 @@ public class EmployeeData {
 
     public ServiceType getType() {
         return type;
+    }
+
+    public String getId() {
+        return id;
     }
 
     public Map<Integer, Double> getServiceTimeProbabilities() {
@@ -61,5 +67,10 @@ public class EmployeeData {
                 .findFirst()
                 .map(Range::value)
                 .orElseThrow();
+    }
+
+    @Override
+    public String toString() {
+        return this.id + ":" + (this.area == Area.OUTDOOR ? "OUT" : "IN")  + "_" + this.type;
     }
 }

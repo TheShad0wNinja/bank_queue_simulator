@@ -56,7 +56,7 @@ public class ProbabilitiesTable extends JPanel {
                 } else if (column == 0) {
                     try {
                         double value = Double.parseDouble(aValue.toString());
-                        super.setValueAt(Math.floor(value), row, column);
+                        super.setValueAt((int) Math.floor(value), row, column);
                         updateCumulativeProbabilities();
                         return;
                     } catch (NumberFormatException e) {
