@@ -2,6 +2,7 @@ package com.bank.ui.pages;
 
 import com.bank.controllers.SimulationPanelController;
 import com.bank.ui.Theme;
+import com.bank.ui.components.SimulationEventsTable;
 import com.bank.ui.components.ThemeButton;
 import com.bank.ui.components.ThemePanel;
 import com.bank.ui.components.ThemeTextField;
@@ -14,6 +15,7 @@ import java.util.Map;
 public class SimulationPanel extends JPanel {
     private JPanel simulationParamsPanel;
     private JButton startSimulationButton;
+    private JPanel simulationResultsPanel;
 
     public SimulationPanel() {
         setLayout(new BorderLayout());
@@ -51,6 +53,17 @@ public class SimulationPanel extends JPanel {
         content.add(prepareSimulationStartButton(), c);
 
         c.gridy++;
+        c.insets = new Insets(30, 0, 5, 0);
+        JLabel simResultsTitle = new JLabel("Simulation Results");
+        simResultsTitle.setFont(Theme.TITLE_FONT);
+        simResultsTitle.setHorizontalAlignment(SwingConstants.LEFT);
+        content.add(simResultsTitle, c);
+
+        c.gridy++;
+        c.insets = new Insets(5, 0, 0, 0);
+        content.add(prepareSimulationResultsPanel(), c);
+
+        c.gridy++;
         c.fill = GridBagConstraints.BOTH;
         c.weighty = 1.0;
         content.add(Box.createVerticalGlue(), c);
@@ -77,6 +90,25 @@ public class SimulationPanel extends JPanel {
 
         panel.add(simulationParamsPanel, BorderLayout.CENTER);
         return panel;
+    }
+    
+    private JPanel prepareSimulationResultsPanel() {
+        simulationResultsPanel = new ThemePanel();
+        simulationResultsPanel.setLayout(new GridBagLayout());
+        simulationResultsPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        simulationResultsPanel.setVisible(false);
+
+        return simulationResultsPanel;
+    }
+
+    public void setSimulationEventsTable(SimulationEventsTable simulationEventsTable) {
+        GridBagConstraints c = new GridBagConstraints();
+        c.fill = GridBagConstraints.HORIZONTAL;
+        c.weightx = 1.0;
+        c.weighty = 0.0;
+        c.gridx = 0;
+        c.gridy = 0;
+        simulationResultsPanel.add(simulationEventsTable, c);
     }
 
     public Map<String, JTextField> addSimulationParameter(Map<String, String> parameters) {
@@ -132,4 +164,7 @@ public class SimulationPanel extends JPanel {
         startSimulationButton.addActionListener(action);
     }
 
+    public void showResults() {
+        simulationResultsPanel.setVisible(true);
+    }
 }

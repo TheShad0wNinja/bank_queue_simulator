@@ -16,17 +16,20 @@ public class Simulator {
 
     private final PriorityQueue<Event> events = new PriorityQueue<>();
 
-    private final Queue<Customer> outdoorTellerQueue= new LinkedList<>();
-    private final Queue<Customer> indoorTellerQueue= new LinkedList<>();
+    private final Queue<Customer> outdoorTellerQueue = new LinkedList<>();
+    private final Queue<Customer> indoorTellerQueue = new LinkedList<>();
     private final Queue<Customer> serviceEmployeeQueue = new LinkedList<>();
 
     private List<Employee> outdoorTellersStatus;
     private List<Employee> indoorTellersStatus;
     private List<Employee> serviceEmployeesStatus;
 
+    private final EventPrinter eventPrinter;
+
     private int currentTime = 0;
 
-    public Simulator() {
+    public Simulator(EventPrinter eventPrinter) {
+        this.eventPrinter = eventPrinter;
     }
 
     public void startSimulation(Runnable onSimulationEnd) {
@@ -43,7 +46,8 @@ public class Simulator {
             int timeBetweenCustomer = configs.getTimeBetweenArrival(rand.nextDouble());
             int arrivalTime = currentTime + timeBetweenCustomer;
 
-            ServiceType serviceType = rand.nextDouble() <= configs.getCashCustomerProbability() ? ServiceType.CASH : ServiceType.SERVICE;
+            ServiceType serviceType = rand.nextDouble() <= configs.getCashCustomerProbability()
+                    ? ServiceType.CASH : ServiceType.SERVICE;
 
             Customer customer = new Customer(serviceType, arrivalTime, i);
 
@@ -52,11 +56,9 @@ public class Simulator {
             currentTime = arrivalTime;
         }
 
-
         currentTime = 0;
-        while(!events.isEmpty()) {
+        while (!events.isEmpty()) {
             Event event = events.poll();
-
             currentTime = event.getTime();
 
             if (event.getType() == Event.Type.ARRIVAL) {
@@ -70,69 +72,85 @@ public class Simulator {
     }
 
     private void handleArrival(Event event) {
-        if (event.getCustomer().serviceType() == ServiceType.CASH)
+        Customer c = event.getCustomer();
+        printEvent("ARRIVAL", c, null, "Customer arrived");
+
+        if (c.serviceType() == ServiceType.CASH)
             routeToOutdoorTeller(event);
         else
             routeToServiceEmployee(event);
     }
 
     private void routeToOutdoorTeller(Event event) {
-        if (outdoorTellerQueue.size() > outdoorQueueCapacity)
+        Customer c = event.getCustomer();
+        if (outdoorTellerQueue.size() > outdoorQueueCapacity) {
+            printEvent("ROUTE", c, null, "Outdoor queue full → reroute indoor");
             routeToIndoorTeller(event);
-        else {
+        } else {
             Employee availableEmployee = outdoorTellersStatus.stream().filter(e -> e.isIdle).findFirst().orElse(null);
             if (availableEmployee != null) {
-                serveCustomer(event.getCustomer(), availableEmployee);
+                serveCustomer(c, availableEmployee);
             } else {
-                outdoorTellerQueue.offer(event.getCustomer());
+                outdoorTellerQueue.offer(c);
+                printEvent("QUEUE", c, null, "Joined outdoor queue");
             }
         }
     }
 
-
     private void routeToIndoorTeller(Event event) {
+        Customer c = event.getCustomer();
         Employee availableEmployee = indoorTellersStatus.stream().filter(e -> e.isIdle).findFirst().orElse(null);
         if (availableEmployee != null) {
-            serveCustomer(event.getCustomer(), availableEmployee);
+            serveCustomer(c, availableEmployee);
         } else {
-            indoorTellerQueue.offer(event.getCustomer());
+            indoorTellerQueue.offer(c);
+            printEvent("QUEUE", c, null, "Joined indoor teller queue");
         }
     }
 
     private void routeToServiceEmployee(Event event) {
+        Customer c = event.getCustomer();
         Employee availableEmployee = serviceEmployeesStatus.stream().filter(e -> e.isIdle).findFirst().orElse(null);
         if (availableEmployee != null) {
-            serveCustomer(event.getCustomer(), availableEmployee);
+            serveCustomer(c, availableEmployee);
         } else {
-            serviceEmployeeQueue.offer(event.getCustomer());
+            serviceEmployeeQueue.offer(c);
+            printEvent("QUEUE", c, null, "Joined service employee queue");
         }
     }
 
     private void serveCustomer(Customer customer, Employee employee) {
         customer.setServiceTimeStart(currentTime);
-
         employee.setBusy(currentTime);
 
         EmployeeData employeeData = employee.employeeData;
-
         int serviceTime = employeeData.getServiceTime(rand.nextDouble());
-
         int departureTime = currentTime + serviceTime;
+
+        printEvent("SERVE", customer, employee,
+                String.format("Service started (serviceTime=%d, depart=%d)", serviceTime, departureTime));
 
         events.add(new Event(Event.Type.DEPARTURE, departureTime, customer, employee));
     }
 
     private void handleDeparture(Event event) {
         currentTime = event.getTime();
-
         Employee employee = event.getEmployeeStatus();
+        Customer customer = event.getCustomer();
+
         employee.setIdle(currentTime);
+        printEvent("DEPART", customer, employee, "Service completed");
 
         Queue<Customer> assignedQueue = employee.assignedQueue;
         if (!assignedQueue.isEmpty()) {
-            Customer customer = assignedQueue.poll();
-            serveCustomer(customer, employee);
+            Customer next = assignedQueue.poll();
+            printEvent("NEXT", next, employee, "Next customer begins service");
+            serveCustomer(next, employee);
         }
+    }
+
+    private void printEvent(String type, Customer c, Employee e, String action) {
+        eventPrinter.printEvent(type, c, e, action, indoorTellerQueue.size(), outdoorTellerQueue.size(), serviceEmployeeQueue.size(), currentTime);
     }
 
     public int getSimulationRetries() {
