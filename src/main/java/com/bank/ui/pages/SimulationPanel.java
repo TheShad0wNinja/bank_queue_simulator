@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class SimulationPanel extends JPanel {
-    private final SimulationPanelController controller;
     private JPanel simulationParamsPanel;
     private JButton startSimulationButton;
 
@@ -44,7 +43,7 @@ public class SimulationPanel extends JPanel {
         content.add(title, c);
 
         c.gridy++;
-        c.insets = new Insets(0, 0, 0, 0);
+        c.insets = new Insets(5, 0, 0, 0);
         content.add(prepareSimulationParametersPanel(), c);
 
         c.gridy++;
@@ -58,7 +57,7 @@ public class SimulationPanel extends JPanel {
 
         add(content, BorderLayout.CENTER);
 
-        controller = new SimulationPanelController(this);
+        new SimulationPanelController(this);
     }
 
     private JButton prepareSimulationStartButton() {

@@ -44,19 +44,35 @@ public class SettingsPanel extends JPanel {
         c.gridx = 0;
         c.gridy = 0;
         c.weightx = 1.0;
-        c.insets = new Insets(0, 0, 40, 0);
+        c.insets = new Insets(0, 0, 0, 0);
         c.anchor = GridBagConstraints.NORTH;
         content.add(prepareHeaderPanel(), c);
 
-        c.insets = new Insets(0, 0, 40, 0);
-        c.gridy = 1;
+
+        c.gridy++;
+        c.insets = new Insets(40, 0, 0, 0);
+        JLabel generalConfigTitle = new JLabel("General Configurations");
+        generalConfigTitle.setFont(Theme.TITLE_FONT);
+        generalConfigTitle.setHorizontalAlignment(SwingConstants.LEFT);
+        content.add(generalConfigTitle, c);
+
+        c.insets = new Insets(5, 0, 0, 0);
+        c.gridy++;
         content.add(prepareGeneralSettingsPanel(), c);
 
-        c.insets = new Insets(0, 0, 0, 0);
-        c.gridy = 2;
+
+        c.gridy++;
+        c.insets = new Insets(40, 0, 0, 0);
+        JLabel title = new JLabel("Distributions");
+        title.setFont(Theme.TITLE_FONT);
+        title.setHorizontalAlignment(SwingConstants.LEFT);
+        content.add(title, c);
+
+        c.insets = new Insets(5, 0, 0, 0);
+        c.gridy++;
         content.add(prepareProbabilityDistributionPanel(), c);
 
-        c.gridy = 3;
+        c.gridy++;
         c.weighty = 1.0;
         c.fill = GridBagConstraints.BOTH;
         content.add(Box.createVerticalGlue(), c);
@@ -78,14 +94,8 @@ public class SettingsPanel extends JPanel {
         c.fill = GridBagConstraints.HORIZONTAL;
         c.insets = new Insets(10, 20, 0, 20);
 
-        c.gridx = 0;
         c.gridy = 0;
-        c.gridwidth = 2; // span both columns
         c.weightx = 1.0;
-        JLabel title = new JLabel("General Configuration");
-        title.setFont(Theme.TITLE_FONT);
-        title.setHorizontalAlignment(SwingConstants.LEFT);
-        panel.add(title, c);
 
         c.gridwidth = 1;
         final int columns = 2;
@@ -141,13 +151,13 @@ public class SettingsPanel extends JPanel {
         headerPanel.add(Box.createHorizontalGlue());
 
         resetBtn = new ThemeButton("Reset to Default", ThemeButton.Variant.DEFAULT);
-        resetBtn.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        resetBtn.setFont(Theme.DEFAULT_FONT.deriveFont(Font.PLAIN, 18));
         headerPanel.add(resetBtn);
 
         headerPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 
         saveBtn = new ThemeButton("Save", ThemeButton.Variant.PRIMARY);
-        saveBtn.setFont(new Font("Segoe UI", Font.PLAIN, 18));
+        saveBtn.setFont(Theme.DEFAULT_FONT.deriveFont(Font.PLAIN, 18));
         headerPanel.add(saveBtn);
 
         return headerPanel;
@@ -159,20 +169,13 @@ public class SettingsPanel extends JPanel {
         GridBagConstraints c = new GridBagConstraints();
 
 
-        c.fill = GridBagConstraints.HORIZONTAL;
+        c.fill = GridBagConstraints.BOTH;
         c.weightx = 1.0;
         c.gridx = 0;
         c.gridy = 0;
-        c.insets = new Insets(10, 20, 0, 20);
-        JLabel title = new JLabel("Service Time Distributions");
-        title.setFont(Theme.TITLE_FONT);
-        panel.add(title, c);
-
-        panel.add(Box.createRigidArea(new Dimension(0, 20)));
-
-        c.gridy++;
+        c.insets = new Insets(20, 20, 20, 20);
         c.weighty = 1.0;
-        c.fill = GridBagConstraints.BOTH;
+
         tablesPanel = new JPanel();
         tablesPanel.setLayout(new BoxLayout(tablesPanel, BoxLayout.Y_AXIS));
         panel.add(tablesPanel, c);
