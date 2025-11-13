@@ -1,6 +1,6 @@
 package com.bank.controllers;
 
-import com.bank.models.Employee;
+import com.bank.models.EmployeeData;
 import com.bank.simulation.SimulationConfigs;
 import com.bank.ui.pages.SettingsPanel;
 
@@ -9,6 +9,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.bank.models.ServiceType.CASH;
+import static com.bank.models.ServiceType.SERVICE;
 
 public class SettingsPanelController {
     private final SettingsPanel view;
@@ -35,18 +38,18 @@ public class SettingsPanelController {
         view.setTimeBetweenArrivalsTable(simulationConfigs.getTimeBetweenArrivalProbability());
 
         int outdoorTellerCount = 0;
-        for (Employee employee : simulationConfigs.getOutdoorCashEmployees()) {
-            view.addEmployeeTable("outdoor_teller_" + outdoorTellerCount++, employee);
+        for (EmployeeData employeeData : simulationConfigs.getOutdoorCashEmployees()) {
+            view.addEmployeeTable("outdoor_teller_" + outdoorTellerCount++, employeeData);
         }
 
         int indoorTellerCount = 0;
-        for (Employee employee : simulationConfigs.getIndoorCashEmployees()) {
-            view.addEmployeeTable("indoor_teller_" + indoorTellerCount++, employee);
+        for (EmployeeData employeeData : simulationConfigs.getIndoorCashEmployees()) {
+            view.addEmployeeTable("indoor_teller_" + indoorTellerCount++, employeeData);
         }
 
         int indoorServiceCount = 0;
-        for (Employee employee : simulationConfigs.getIndoorServiceEmployees()) {
-            view.addEmployeeTable("indoor_service_" + indoorServiceCount++, employee);
+        for (EmployeeData employeeData : simulationConfigs.getIndoorServiceEmployees()) {
+            view.addEmployeeTable("indoor_service_" + indoorServiceCount++, employeeData);
         }
     }
 
@@ -69,7 +72,7 @@ public class SettingsPanelController {
 
             simulationConfigs.setTimeBetweenArrivalProbability(extractProbabilitiesFromTable(view.getTimeBetweenArrivalsTable().getTableData()));
 
-            List<Employee> newEmployees = new ArrayList<>();
+            List<EmployeeData> newEmployeeData = new ArrayList<>();
 
             var tables = view.getAllEmployeeTables();
 
@@ -81,9 +84,9 @@ public class SettingsPanelController {
                     serviceTimes = extractProbabilitiesFromTable(tables.get(key).getTableData());
                 }
 
-                newEmployees.add(new Employee(
-                        Employee.Area.OUTDOOR,
-                        Employee.Type.CASH,
+                newEmployeeData.add(new EmployeeData(
+                        EmployeeData.Area.OUTDOOR,
+                        CASH,
                         serviceTimes
                 ));
             }
@@ -96,9 +99,9 @@ public class SettingsPanelController {
                     serviceTimes = extractProbabilitiesFromTable(tables.get(key).getTableData());
                 }
 
-                newEmployees.add(new Employee(
-                        Employee.Area.INDOOR,
-                        Employee.Type.CASH,
+                newEmployeeData.add(new EmployeeData(
+                        EmployeeData.Area.INDOOR,
+                        CASH,
                         serviceTimes
                 ));
             }
@@ -111,14 +114,14 @@ public class SettingsPanelController {
                     serviceTimes = extractProbabilitiesFromTable(tables.get(key).getTableData());
                 }
 
-                newEmployees.add(new Employee(
-                        Employee.Area.INDOOR,
-                        Employee.Type.SERVICE,
+                newEmployeeData.add(new EmployeeData(
+                        EmployeeData.Area.INDOOR,
+                        SERVICE,
                         serviceTimes
                 ));
             }
 
-            simulationConfigs.setEmployees(newEmployees);
+            simulationConfigs.setEmployees(newEmployeeData);
 
             showSuccess("Settings saved successfully!");
 

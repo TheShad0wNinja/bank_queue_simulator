@@ -1,69 +1,35 @@
 package com.bank.models;
 
-import java.util.ArrayList;
-import java.util.Map;
+import java.util.Queue;
 
 public class Employee {
-    public enum Area {
-        INDOOR, OUTDOOR
+    public boolean isIdle = true;
+    public int lastEventTime = 0;
+    public int totalIdle = 0;
+    public final EmployeeData employeeData;
+    public final Queue<Customer> assignedQueue;
+
+    public Employee(EmployeeData employeeData, Queue<Customer> assignedQueue) {
+        this.employeeData = employeeData;
+        this.assignedQueue = assignedQueue;
     }
 
-    public enum Type {
-        CASH, SERVICE
+    public void setBusy(int time) {
+        isIdle = false;
+        totalIdle += time - lastEventTime;
     }
 
-    private final Area area;
-    private final Type type;
-
-    private ArrayList<Range> serviceTimeRanges;
-    private Map<Integer, Double> serviceTimeProbabilities;
-
-    public Employee(Area area, Type type) {
-        this.area = area;
-        this.type = type;
+    public void setIdle(int time) {
+        isIdle = true;
+        lastEventTime = time;
     }
 
-    public Employee(Area area, Type type, Map<Integer, Double> serviceTimeProbabilities) {
-        this(area, type);
-        this.serviceTimeProbabilities = serviceTimeProbabilities;
-        updateServiceTimeRanges();
-    }
-
-    public Area getArea() {
-        return area;
-    }
-
-    public Type getType() {
-        return type;
-    }
-
-    public Map<Integer, Double> getServiceTimeProbabilities() {
-        return serviceTimeProbabilities;
-    }
-
-    public void setServiceTimeProbabilities(Map<Integer, Double> serviceTimeProbabilities) {
-        this.serviceTimeProbabilities = serviceTimeProbabilities;
-        updateServiceTimeRanges();
-    }
-
-    private void updateServiceTimeRanges() {
-        serviceTimeRanges = new ArrayList<>();
-        double lastProbability = 0.0;
-        for (var entry : serviceTimeProbabilities.entrySet()) {
-            // No need to add onto the last probability because it'll be avoided due to findFirst being used
-            serviceTimeRanges.add(new Range(lastProbability , lastProbability + entry.getValue(), entry.getKey()));
-            lastProbability += entry.getValue();
-        }
-
-        if (lastProbability > 1)
-            throw new ArithmeticException("Service time probabilities are out of range");
-    }
-
-    public double getServiceTime(double probability) {
-        return serviceTimeRanges.stream()
-                .filter(range -> range.contains(probability))
-                .findFirst()
-                .map(Range::value)
-                .orElseThrow();
+    @Override
+    public String toString() {
+        return "EmployeeStatus{" +
+                "totalIdle=" + totalIdle +
+                ", lastEvent=" + lastEventTime +
+                ", idle=" + isIdle +
+                '}';
     }
 }

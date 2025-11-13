@@ -23,16 +23,24 @@ public class SimulationPanelController {
     private void loadParams() {
         simulationParamFields = view.addSimulationParameter(Map.of(
                 "simulation_days", "Simulation Days",
-                "customer_number", "Customers per Day",
+                "simulation_customers", "Customers per Day",
                 "simulation_repetition", "Simulation Repetition"
         ));
     }
 
     private void startSimulation() {
-        System.out.println("Starting Simulation");
+        simulator.setSimulationCustomers(Integer.parseInt(simulationParamFields.get("simulation_customers").getText()));
+        simulator.setSimulationDays(Integer.parseInt(simulationParamFields.get("simulation_days").getText()));
+        simulator.setSimulationRetries(Integer.parseInt(simulationParamFields.get("simulation_repetition").getText()));
+
+        simulator.startSimulation(() -> showSuccessMessage("Simulation Complete"));
     }
 
     private void setupActions() {
         view.setStartButtonAction(action -> startSimulation());
+    }
+
+    public void showSuccessMessage(String message) {
+        JOptionPane.showMessageDialog(view, message, "Success", JOptionPane.INFORMATION_MESSAGE);
     }
 }

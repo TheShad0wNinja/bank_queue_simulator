@@ -1,7 +1,7 @@
 package com.bank.ui.pages;
 
 import com.bank.controllers.SettingsPanelController;
-import com.bank.models.Employee;
+import com.bank.models.EmployeeData;
 import com.bank.ui.Theme;
 import com.bank.ui.components.*;
 import com.bank.utils.TextUtils;
@@ -231,7 +231,7 @@ public class SettingsPanel extends JPanel {
         return table;
     }
 
-    public void addEmployeeTable(String employeeKey, Employee employee) {
+    public void addEmployeeTable(String employeeKey, EmployeeData employeeData) {
         if (!employeeTables.containsKey(employeeKey)) {
             String employeeLabel = TextUtils.capitalize(
                     String.join(" ",
@@ -242,7 +242,7 @@ public class SettingsPanel extends JPanel {
                                                     : str
                                     ).toList()));
 
-            employeeTables.put(employeeKey, addProbabilityTable(employeeLabel, employee.getServiceTimeProbabilities()));
+            employeeTables.put(employeeKey, addProbabilityTable(employeeLabel, employeeData.getServiceTimeProbabilities()));
         }
 
         tablesPanel.revalidate();

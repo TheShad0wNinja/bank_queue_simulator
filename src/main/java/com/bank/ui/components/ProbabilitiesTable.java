@@ -1,7 +1,5 @@
 package com.bank.ui.components;
 
-import com.bank.models.Employee;
-import com.bank.models.Range;
 import com.bank.ui.Theme;
 
 import javax.swing.*;
@@ -9,7 +7,6 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.Map;
 
 public class ProbabilitiesTable extends JPanel {

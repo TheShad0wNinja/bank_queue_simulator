@@ -110,6 +110,7 @@ public class SimulationPanel extends JPanel {
 
             c.gridy = rowPair + 2;
             ThemeTextField field = new ThemeTextField(25);
+            field.setText("10");
             map.put(entry.getKey(), field);
             simulationParamsPanel.add(field, c);
             i++;
@@ -131,4 +132,5 @@ public class SimulationPanel extends JPanel {
         }
         startSimulationButton.addActionListener(action);
     }
+
 }

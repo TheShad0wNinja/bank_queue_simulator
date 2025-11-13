@@ -1,6 +1,6 @@
 package com.bank.simulation;
 
-import com.bank.models.Employee;
+import com.bank.models.EmployeeData;
 import com.bank.models.Range;
 
 import java.util.ArrayList;
@@ -8,6 +8,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static com.bank.models.ServiceType.CASH;
+import static com.bank.models.ServiceType.SERVICE;
 
 public class SimulationConfigs {
     public static SimulationConfigs instance = new SimulationConfigs();
@@ -17,7 +20,7 @@ public class SimulationConfigs {
     private double cashCustomerProbability;
     private ArrayList<Range> timeBetweenArrivalRanges;
     private Map<Integer, Double> timeBetweenArrivalProbability;
-    private List<Employee> employees;
+    private List<EmployeeData> employeeData;
 
     private SimulationConfigs() {
         resetParamsToDefault();
@@ -36,19 +39,19 @@ public class SimulationConfigs {
         ));
         updateTimeBetweenArrivalRanges();
 
-        employees = new ArrayList<>();
-        Employee outdoorTeller = new Employee(
-                Employee.Area.OUTDOOR,
-                Employee.Type.CASH,
+        employeeData = new ArrayList<>();
+        EmployeeData outdoorTeller = new EmployeeData(
+                EmployeeData.Area.OUTDOOR,
+                CASH,
                 new HashMap<>(Map.of(
                         2, 0.2,
                         3, 0.3,
                         4, 0.5
                 ))
         );
-        Employee indoorTeller = new Employee(
-                Employee.Area.INDOOR,
-                Employee.Type.CASH,
+        EmployeeData indoorTeller = new EmployeeData(
+                EmployeeData.Area.INDOOR,
+                CASH,
                 new HashMap<>(Map.of(
                         2, 0.2,
                         3, 0.3,
@@ -56,9 +59,9 @@ public class SimulationConfigs {
                 ))
         );
 
-        Employee indoorServiceEmployee = new Employee(
-                Employee.Area.INDOOR,
-                Employee.Type.SERVICE,
+        EmployeeData indoorServiceEmployeeData = new EmployeeData(
+                EmployeeData.Area.INDOOR,
+                SERVICE,
                 new HashMap<>(Map.of(
                         4, 0.2,
                         6, 0.5,
@@ -66,9 +69,9 @@ public class SimulationConfigs {
                 ))
         );
 
-        employees.add(outdoorTeller);
-        employees.add(indoorTeller);
-        employees.add(indoorServiceEmployee);
+        employeeData.add(outdoorTeller);
+        employeeData.add(indoorTeller);
+        employeeData.add(indoorServiceEmployeeData);
     }
 
     public int getIndoorQueueCapacity() {
@@ -87,8 +90,8 @@ public class SimulationConfigs {
         this.outdoorQueueCapacity = outdoorQueueCapacity;
     }
 
-    public void setEmployees(List<Employee> employees) {
-        this.employees = employees;
+    public void setEmployees(List<EmployeeData> employeeData) {
+        this.employeeData = employeeData;
     }
 
     public double getCashCustomerProbability() {
@@ -103,24 +106,24 @@ public class SimulationConfigs {
         return (1 - cashCustomerProbability);
     }
 
-    public List<Employee> getIndoorServiceEmployees() {
-        return employees
+    public List<EmployeeData> getIndoorServiceEmployees() {
+        return employeeData
                 .stream()
-                .filter(e -> e.getType().equals(Employee.Type.SERVICE) && e.getArea().equals(Employee.Area.INDOOR))
+                .filter(e -> e.getType().equals(SERVICE) && e.getArea().equals(EmployeeData.Area.INDOOR))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public List<Employee> getOutdoorCashEmployees() {
-        return employees
+    public List<EmployeeData> getOutdoorCashEmployees() {
+        return employeeData
                 .stream()
-                .filter(e -> e.getType().equals(Employee.Type.CASH) && e.getArea().equals(Employee.Area.OUTDOOR))
+                .filter(e -> e.getType().equals(CASH) && e.getArea().equals(EmployeeData.Area.OUTDOOR))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public List<Employee> getIndoorCashEmployees() {
-        return employees
+    public List<EmployeeData> getIndoorCashEmployees() {
+        return employeeData
                 .stream()
-                .filter(e -> e.getType().equals(Employee.Type.CASH) && e.getArea().equals(Employee.Area.INDOOR))
+                .filter(e -> e.getType().equals(CASH) && e.getArea().equals(EmployeeData.Area.INDOOR))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
@@ -146,7 +149,7 @@ public class SimulationConfigs {
             throw new ArithmeticException("Time between arrivals probabilities are out of range");
     }
 
-    public double getTimeBetweenArrival(double probability) {
+    public int getTimeBetweenArrival(double probability) {
         return timeBetweenArrivalRanges.stream()
                 .filter(range -> range.contains(probability))
                 .findFirst()
