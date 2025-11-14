@@ -71,6 +71,6 @@ public class EmployeeData {
 
     @Override
     public String toString() {
-        return this.id + ":" + (this.area == Area.OUTDOOR ? "OUT" : "IN")  + "_" + this.type;
+        return this.id;
     }
 }

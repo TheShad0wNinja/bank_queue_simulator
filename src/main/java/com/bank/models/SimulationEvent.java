@@ -1,8 +1,8 @@
 package com.bank.models;
 
-public class Event implements Comparable<Event> {
+public class SimulationEvent implements Comparable<SimulationEvent> {
     @Override
-    public int compareTo(Event o) {
+    public int compareTo(SimulationEvent o) {
         return this.time - o.time ;
     }
 
@@ -11,18 +11,18 @@ public class Event implements Comparable<Event> {
         DEPARTURE,
     }
 
-    private Type type;
-    private int time;
-    private Customer customer;
+    private final Type type;
+    private final int time;
+    private final Customer customer;
     private Employee employee;
 
-    public Event(Type type, int time, Customer customer) {
+    public SimulationEvent(Type type, int time, Customer customer) {
         this.type = type;
         this.time = time;
         this.customer = customer;
     }
 
-    public Event(Type type, int time, Customer customer, Employee employee) {
+    public SimulationEvent(Type type, int time, Customer customer, Employee employee) {
         this(type, time, customer);
         this.employee = employee;
     }

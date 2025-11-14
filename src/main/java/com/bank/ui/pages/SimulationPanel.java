@@ -16,6 +16,7 @@ public class SimulationPanel extends JPanel {
     private JPanel simulationParamsPanel;
     private JButton startSimulationButton;
     private JPanel simulationResultsPanel;
+    private SimulationEventsTable simulationEventsTable;
 
     public SimulationPanel() {
         setLayout(new BorderLayout());
@@ -102,13 +103,27 @@ public class SimulationPanel extends JPanel {
     }
 
     public void setSimulationEventsTable(SimulationEventsTable simulationEventsTable) {
+        this.simulationEventsTable = simulationEventsTable;
+
         GridBagConstraints c = new GridBagConstraints();
         c.fill = GridBagConstraints.HORIZONTAL;
         c.weightx = 1.0;
         c.weighty = 0.0;
         c.gridx = 0;
         c.gridy = 0;
+        c.insets = new Insets(0, 0, 0, 0);
+        JLabel title = new JLabel("First Run's Simulation Events");
+        title.setFont(Theme.TITLE_FONT);
+        title.setHorizontalAlignment(SwingConstants.LEFT);
+        simulationParamsPanel.add(title, c);
+
+        c.gridy++;
+        c.insets = new Insets(5, 0, 0, 0);
         simulationResultsPanel.add(simulationEventsTable, c);
+    }
+
+    public void clearSimulationEventsTable() {
+        simulationEventsTable.clearEvents();
     }
 
     public Map<String, JTextField> addSimulationParameter(Map<String, String> parameters) {
@@ -167,4 +182,5 @@ public class SimulationPanel extends JPanel {
     public void showResults() {
         simulationResultsPanel.setVisible(true);
     }
+
 }

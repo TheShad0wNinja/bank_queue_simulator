@@ -2,23 +2,23 @@ package com.bank.models;
 
 import com.bank.ui.components.SimulationEventsTable;
 
-public class EventPrinter {
+public class EventPrinter implements SimulationListener{
     private final SimulationEventsTable eventsTable;
 
     public EventPrinter(SimulationEventsTable eventsTable) {
         this.eventsTable = eventsTable;
     }
 
-    public void printEvent(
-            String type,
-            Customer c,
-            Employee e,
-            String action,
-            int indoorTellerQueueSize,
-            int outdoorTellerQueueSize,
-            int serviceEmployeeQueueSize,
-            int currentTime
-    ) {
+    public void printEvent( SimulationEventRecord simulationEventRecord ) {
+        Employee e = simulationEventRecord.event().getEmployeeStatus();
+        Customer c = simulationEventRecord.event().getCustomer();
+        int indoorTellerQueueSize = simulationEventRecord.indoorTellerQueueSize();
+        int outdoorTellerQueueSize = simulationEventRecord.outdoorTellerQueueSize();
+        int serviceEmployeeQueueSize = simulationEventRecord.serviceEmployeeQueueSize();
+        int currentTime = simulationEventRecord.currentTime();
+        String description = simulationEventRecord.description();
+        SimulationEventRecord.Type type = simulationEventRecord.type();
+
         String empName = (e == null) ? "-" : e.employeeData.toString();
         String queues = String.format("O:%d | I:%d | S:%d",
                 outdoorTellerQueueSize,
@@ -26,18 +26,16 @@ public class EventPrinter {
                 serviceEmployeeQueueSize
         );
 
-        // Add row to UI table
         eventsTable.addEventRow(
                 currentTime,
-                type,
+                type.toString(),
                 "Cust#" + c.id(),
                 c.serviceType().toString(),
                 empName,
                 queues,
-                action
+                description
         );
 
-        // Also keep console printing if you want:
         System.out.printf("%-8d | %-10s | %-12s | %-10s | %-15s | %-15s | %-15s%n",
                 currentTime,
                 type,
@@ -45,7 +43,12 @@ public class EventPrinter {
                 c.serviceType(),
                 empName,
                 queues,
-                action
+                description
         );
+    }
+
+    @Override
+    public void onEvent(SimulationEventRecord eventRecord) {
+        printEvent(eventRecord);
     }
 }
