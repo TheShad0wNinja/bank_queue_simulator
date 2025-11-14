@@ -5,8 +5,8 @@ import com.bank.ui.Theme;
 import javax.swing.*;
 import java.awt.*;
 
-public class HistoryPanel extends JPanel {
-    public HistoryPanel() {
+public class HistoryPage extends JPanel {
+    public HistoryPage() {
         setLayout(new BorderLayout());
         setBackground(Theme.BACKGROUND);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));

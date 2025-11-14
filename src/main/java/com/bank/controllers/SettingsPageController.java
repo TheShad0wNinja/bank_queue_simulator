@@ -2,7 +2,7 @@ package com.bank.controllers;
 
 import com.bank.models.EmployeeData;
 import com.bank.simulation.SimulationConfigs;
-import com.bank.ui.pages.SettingsPanel;
+import com.bank.ui.pages.SettingsPage;
 
 import javax.swing.*;
 import java.util.*;
@@ -10,11 +10,11 @@ import java.util.*;
 import static com.bank.models.ServiceType.CASH;
 import static com.bank.models.ServiceType.SERVICE;
 
-public class SettingsPanelController {
-    private final SettingsPanel view;
+public class SettingsPageController {
+    private final SettingsPage view;
     private final SimulationConfigs configs;
 
-    public SettingsPanelController(SettingsPanel view) {
+    public SettingsPageController(SettingsPage view) {
         this.view = view;
         this.configs = SimulationConfigs.instance;
 

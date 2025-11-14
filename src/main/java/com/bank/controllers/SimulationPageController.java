@@ -4,7 +4,7 @@ import com.bank.models.EventPrinter;
 import com.bank.simulation.Simulator;
 import com.bank.ui.components.SimulationEventsTable;
 import com.bank.ui.components.SimulationStatisticsTable;
-import com.bank.ui.pages.SimulationPanel;
+import com.bank.ui.pages.SimulationPage;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.JFreeChart;
 import org.jfree.data.category.DefaultCategoryDataset;
@@ -14,8 +14,8 @@ import javax.swing.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class SimulationPanelController {
-    private final SimulationPanel view;
+public class SimulationPageController {
+    private final SimulationPage view;
     private final Simulator simulator;
     private Map<String, JTextField> simulationParamFields;
     private final SimulationEventsTable simulationEventsTable = new SimulationEventsTable();
@@ -23,7 +23,7 @@ public class SimulationPanelController {
     private final SimulationStatisticsTable firstBatchStatsTable = new SimulationStatisticsTable();
     private final SimulationStatisticsTable totalStatsTable = new SimulationStatisticsTable();
 
-    public SimulationPanelController(SimulationPanel view) {
+    public SimulationPageController(SimulationPage view) {
         this.view = view;
         this.simulator = new Simulator();
         this.simulator.addListener(new EventPrinter(simulationEventsTable));
@@ -164,7 +164,7 @@ public class SimulationPanelController {
         var stats = simulator.getTotalStats().getStatistics();
         for (var s : stats) {
             if (s.label().toLowerCase().contains("wait probability")) {
-                double val = parseStatValue(s.value()); // already strips %
+                double val = parseStatValue(s.value());
                 dataset.setValue(s.label(), val);
             }
         }

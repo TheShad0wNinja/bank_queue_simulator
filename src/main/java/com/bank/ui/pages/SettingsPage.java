@@ -1,6 +1,6 @@
 package com.bank.ui.pages;
 
-import com.bank.controllers.SettingsPanelController;
+import com.bank.controllers.SettingsPageController;
 import com.bank.models.EmployeeData;
 import com.bank.ui.Theme;
 import com.bank.ui.components.*;
@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SettingsPanel extends JPanel {
+public class SettingsPage extends JPanel {
     private final Map<String, JTextField> generalConfigs = new HashMap<>();
     private static final String[][] generalConfigLabels = new String[][]{
             {"outdoorQueueSize", "Outdoor Queue Size"},
@@ -29,7 +29,7 @@ public class SettingsPanel extends JPanel {
     private JButton saveBtn;
     private JButton resetBtn;
 
-    public SettingsPanel() {
+    public SettingsPage() {
         setLayout(new BorderLayout());
         setBackground(Theme.BACKGROUND);
 
@@ -77,13 +77,8 @@ public class SettingsPanel extends JPanel {
         c.fill = GridBagConstraints.BOTH;
         content.add(Box.createVerticalGlue(), c);
 
-        JScrollPane scrollPane = new JScrollPane(content);
-        scrollPane.setBorder(null);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        add(scrollPane, BorderLayout.CENTER);
-
-        new SettingsPanelController(this);
+        add(content, BorderLayout.CENTER);
+        new SettingsPageController(this);
     }
 
     private JPanel prepareGeneralSettingsPanel() {
@@ -183,7 +178,6 @@ public class SettingsPanel extends JPanel {
         return panel;
     }
 
-    // Public methods for controller interaction
     public void setGeneralConfigField(String key, String value) {
         JTextField field = generalConfigs.get(key);
         if (field != null) {

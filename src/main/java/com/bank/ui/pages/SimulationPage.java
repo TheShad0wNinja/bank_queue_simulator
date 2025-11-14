@@ -1,6 +1,6 @@
 package com.bank.ui.pages;
 
-import com.bank.controllers.SimulationPanelController;
+import com.bank.controllers.SimulationPageController;
 import com.bank.ui.Theme;
 import com.bank.ui.components.*;
 import org.jfree.chart.ChartPanel;
@@ -13,7 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SimulationPanel extends JPanel {
+public class SimulationPage extends JPanel {
     private JPanel simulationParamsPanel;
     private JButton startSimulationButton;
     private JPanel simulationResultsPanel;
@@ -24,7 +24,7 @@ public class SimulationPanel extends JPanel {
     private final List<Component> chartComponents = new ArrayList<>();
 
 
-    public SimulationPanel() {
+    public SimulationPage() {
         setLayout(new BorderLayout());
         setBackground(Theme.BACKGROUND);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -75,12 +75,9 @@ public class SimulationPanel extends JPanel {
         c.weighty = 1.0;
         content.add(Box.createVerticalGlue(), c);
 
-        JScrollPane scrollPane = new JScrollPane(content);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder());
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-        add(scrollPane, BorderLayout.CENTER);
+        add(content, BorderLayout.CENTER);
 
-        new SimulationPanelController(this);
+        new SimulationPageController(this);
     }
 
     private JButton prepareSimulationStartButton() {

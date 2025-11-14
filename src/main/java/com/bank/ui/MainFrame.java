@@ -5,14 +5,20 @@ import com.bank.ui.pages.*;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class MainFrame extends JFrame {
 
     private final JPanel contentPanel;
     private final CardLayout cardLayout;
-    private final HashMap<String, JPanel> panels = new HashMap<>();
+
     private final String defaultPage = "simulation";
+    private final Map<String, JPanel> pages = new LinkedHashMap<>(){{
+        put("simulation", new SimulationPage());
+        put("history", new HistoryPage());
+        put("settings", new SettingsPage());
+    }};
 
     public MainFrame() {
         setTitle("BankQueue Sim");
@@ -26,22 +32,16 @@ public class MainFrame extends JFrame {
         contentPanel = new JPanel(cardLayout);
         contentPanel.setBackground(Theme.BACKGROUND);
 
-        SimulationPanel simulationPanel = new SimulationPanel();
-        HistoryPanel historyPanel = new HistoryPanel();
-        SettingsPanel settingsPanel = new SettingsPanel();
-
-        panels.put("simulation", simulationPanel);
-        panels.put("history", historyPanel);
-        panels.put("settings", settingsPanel);
-
-        contentPanel.add(simulationPanel, "simulation");
-        contentPanel.add(historyPanel, "history");
-        contentPanel.add(settingsPanel, "settings");
+        pages.forEach((k, v) -> {
+            JScrollPane scrollPane = new JScrollPane(v);
+            scrollPane.setBorder(BorderFactory.createEmptyBorder());
+            scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+            contentPanel.add(scrollPane, k);
+        });
         add(contentPanel, BorderLayout.CENTER);
-
         showPanel(defaultPage);
 
-        MainSideNav sideNav = new MainSideNav(new String[]{"simulation", "history", "settings"}, defaultPage);
+        MainSideNav sideNav = new MainSideNav(pages.keySet().toArray(String[]::new), defaultPage);
         sideNav.setOnSelect(this::showPanel);
 
         add(sideNav, BorderLayout.WEST);
