@@ -2,10 +2,7 @@ package com.bank.ui.pages;
 
 import com.bank.controllers.SimulationPanelController;
 import com.bank.ui.Theme;
-import com.bank.ui.components.SimulationEventsTable;
-import com.bank.ui.components.ThemeButton;
-import com.bank.ui.components.ThemePanel;
-import com.bank.ui.components.ThemeTextField;
+import com.bank.ui.components.*;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,6 +14,9 @@ public class SimulationPanel extends JPanel {
     private JButton startSimulationButton;
     private JPanel simulationResultsPanel;
     private SimulationEventsTable simulationEventsTable;
+    private SimulationStatisticsTable firstDayStats;
+    private SimulationStatisticsTable firstBatchStats;
+    private SimulationStatisticsTable totalStats;
 
     public SimulationPanel() {
         setLayout(new BorderLayout());
@@ -69,7 +69,10 @@ public class SimulationPanel extends JPanel {
         c.weighty = 1.0;
         content.add(Box.createVerticalGlue(), c);
 
-        add(content, BorderLayout.CENTER);
+        JScrollPane scrollPane = new JScrollPane(content);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+        add(scrollPane, BorderLayout.CENTER);
 
         new SimulationPanelController(this);
     }
@@ -92,38 +95,87 @@ public class SimulationPanel extends JPanel {
         panel.add(simulationParamsPanel, BorderLayout.CENTER);
         return panel;
     }
-    
+
     private JPanel prepareSimulationResultsPanel() {
         simulationResultsPanel = new ThemePanel();
-        simulationResultsPanel.setLayout(new GridBagLayout());
+        simulationResultsPanel.setLayout(new BoxLayout(simulationResultsPanel, BoxLayout.Y_AXIS));
         simulationResultsPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         simulationResultsPanel.setVisible(false);
-
         return simulationResultsPanel;
     }
 
     public void setSimulationEventsTable(SimulationEventsTable simulationEventsTable) {
         this.simulationEventsTable = simulationEventsTable;
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 1.0;
-        c.weighty = 0.0;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.insets = new Insets(0, 0, 0, 0);
         JLabel title = new JLabel("First Run's Simulation Events");
         title.setFont(Theme.TITLE_FONT);
-        title.setHorizontalAlignment(SwingConstants.LEFT);
-        simulationParamsPanel.add(title, c);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+        simulationResultsPanel.add(title);
 
-        c.gridy++;
-        c.insets = new Insets(5, 0, 0, 0);
-        simulationResultsPanel.add(simulationEventsTable, c);
+        simulationResultsPanel.add(Box.createVerticalStrut(10));
+
+        simulationEventsTable.setAlignmentX(Component.LEFT_ALIGNMENT);
+        simulationResultsPanel.add(simulationEventsTable);
     }
 
-    public void clearSimulationEventsTable() {
-        simulationEventsTable.clearEvents();
+    public void setFirstDayResultsTable(SimulationStatisticsTable statsTable) {
+        this.firstDayStats = statsTable;
+
+        JLabel title = new JLabel("First Run Statistics");
+        title.setFont(Theme.TITLE_FONT);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+        simulationResultsPanel.add(Box.createVerticalStrut(30));
+        simulationResultsPanel.add(title);
+
+        simulationResultsPanel.add(Box.createVerticalStrut(10));
+
+        statsTable.setAlignmentX(Component.LEFT_ALIGNMENT);
+        simulationResultsPanel.add(statsTable);
+    }
+
+    public void setFirstBatchStats(SimulationStatisticsTable statsTable) {
+        this.firstBatchStats = statsTable;
+
+        JLabel title = new JLabel("First Batch Statistics");
+        title.setFont(Theme.TITLE_FONT);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+        simulationResultsPanel.add(Box.createVerticalStrut(30));
+        simulationResultsPanel.add(title);
+
+        simulationResultsPanel.add(Box.createVerticalStrut(10));
+
+        statsTable.setAlignmentX(Component.LEFT_ALIGNMENT);
+        simulationResultsPanel.add(statsTable);
+    }
+
+    public void setTotalStats(SimulationStatisticsTable statsTable) {
+        this.totalStats = statsTable;
+
+        JLabel title = new JLabel("Total Statistics");
+        title.setFont(Theme.TITLE_FONT);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+        simulationResultsPanel.add(Box.createVerticalStrut(30));
+        simulationResultsPanel.add(title);
+
+        simulationResultsPanel.add(Box.createVerticalStrut(10));
+
+        statsTable.setAlignmentX(Component.LEFT_ALIGNMENT);
+        simulationResultsPanel.add(statsTable);
+    }
+
+    public void clearSimulationResults() {
+        if (simulationEventsTable != null) {
+            simulationEventsTable.clearEvents();
+        }
+        if (firstDayStats != null) {
+            firstDayStats.clearStatistics();
+        }
+        if (firstBatchStats != null) {
+            firstBatchStats.clearStatistics();
+        }
+        if (totalStats != null) {
+            totalStats.clearStatistics();
+        }
     }
 
     public Map<String, JTextField> addSimulationParameter(Map<String, String> parameters) {

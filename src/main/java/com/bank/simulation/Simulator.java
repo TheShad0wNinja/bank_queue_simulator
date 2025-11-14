@@ -30,6 +30,10 @@ public class Simulator {
     private List<Employee> indoorTellers;
     private List<Employee> serviceEmployees;
 
+    private SimulationStatistics firstDayStats;
+    private SimulationStatistics firstBatchStats;
+    private SimulationStatistics totalStats;
+
 
     private int currentTime = 0;
     private SimulationStatistics currentStats;
@@ -44,11 +48,34 @@ public class Simulator {
         outdoorQueueCapacity = configs.getOutdoorQueueCapacity();
         timeBetweenArrivalDistribution = configs.getTimeBetweenArrivalDistribution();
 
-        shouldDispatchEvent = true;
-        runSingleSimulation();
-        shouldDispatchEvent = false;
+        totalStats = new SimulationStatistics();
+        firstDayStats = null;
+        firstBatchStats = null;
 
-        System.out.println("Simulation statistics: \n" + currentStats);
+        for (int batch = 0; batch < simulationRetries; batch++) {
+            for (int day = 0; day < simulationDays; day++) {
+                if (batch == 0 && day == 0) {
+                    shouldDispatchEvent = true;
+                    runSingleSimulation();
+                    shouldDispatchEvent = false;
+                    firstDayStats = currentStats;
+                } else {
+                    runSingleSimulation();
+                }
+                totalStats.merge(currentStats);
+            }
+            if (batch == 0) {
+                firstBatchStats = currentStats;
+            }
+        }
+
+        if (firstDayStats != null) {
+            firstDayStats.calculateStatistics();
+        }
+        if (firstBatchStats != null) {
+            firstBatchStats.calculateStatistics();
+        }
+        totalStats.calculateStatistics();
     }
 
     private void runSingleSimulation() {
@@ -247,5 +274,17 @@ public class Simulator {
 
     public void setSimulationDays(int simulationDays) {
         this.simulationDays = simulationDays;
+    }
+
+    public SimulationStatistics getTotalStats() {
+        return totalStats;
+    }
+
+    public SimulationStatistics getFirstBatchStats() {
+        return firstBatchStats;
+    }
+
+    public SimulationStatistics getFirstDayStats() {
+        return firstDayStats;
     }
 }
