@@ -25,27 +25,27 @@ public class SettingsPanelController {
     public void loadParams() {
         view.setGeneralConfigField("outdoorQueueSize", String.valueOf(configs.getOutdoorQueueCapacity()));
         view.setGeneralConfigField("cashCustomerProp", String.valueOf(configs.getCashCustomerProbability()));
-        view.setGeneralConfigField("numOutdoorTellers", String.valueOf(configs.getOutdoorCashEmployees().size()));
-        view.setGeneralConfigField("numIndoorTellers", String.valueOf(configs.getIndoorCashEmployees().size()));
-        view.setGeneralConfigField("numIndoorServiceEmp", String.valueOf(configs.getIndoorServiceEmployees().size()));
+        view.setGeneralConfigField("numOutdoorTellers", String.valueOf(configs.getOutdoorCashEmployeesData().size()));
+        view.setGeneralConfigField("numIndoorTellers", String.valueOf(configs.getIndoorCashEmployeesData().size()));
+        view.setGeneralConfigField("numIndoorServiceEmp", String.valueOf(configs.getIndoorServiceEmployeesData().size()));
 
 
         view.clearTables();
 
-        view.setTimeBetweenArrivalsTable(configs.getTimeBetweenArrivalProbability());
+        view.setTimeBetweenArrivalsTable(configs.getTimeBetweenArrivalProbabilities());
 
         int outdoorTellerCount = 0;
-        for (EmployeeData employeeData : configs.getOutdoorCashEmployees()) {
+        for (EmployeeData employeeData : configs.getOutdoorCashEmployeesData()) {
             view.addEmployeeTable("outdoor_teller_" + outdoorTellerCount++, employeeData);
         }
 
         int indoorTellerCount = 0;
-        for (EmployeeData employeeData : configs.getIndoorCashEmployees()) {
+        for (EmployeeData employeeData : configs.getIndoorCashEmployeesData()) {
             view.addEmployeeTable("indoor_teller_" + indoorTellerCount++, employeeData);
         }
 
         int indoorServiceCount = 0;
-        for (EmployeeData employeeData : configs.getIndoorServiceEmployees()) {
+        for (EmployeeData employeeData : configs.getIndoorServiceEmployeesData()) {
             view.addEmployeeTable("indoor_service_" + indoorServiceCount++, employeeData);
         }
     }
@@ -67,7 +67,7 @@ public class SettingsPanelController {
             configs.setOutdoorQueueCapacity(outdoorQueueSize);
             configs.setCashCustomerProbability(cashCustomerProp);
 
-            configs.setTimeBetweenArrivalProbability(extractProbabilitiesFromTable(view.getTimeBetweenArrivalsTable().getTableData()));
+            configs.setTimeBetweenArrivalProbabilities(extractProbabilitiesFromTable(view.getTimeBetweenArrivalsTable().getTableData()));
 
             List<EmployeeData> newEmployeeData = new ArrayList<>();
 

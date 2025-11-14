@@ -1,7 +1,7 @@
 package com.bank.simulation;
 
 import com.bank.models.EmployeeData;
-import com.bank.models.Range;
+import com.bank.models.ProbabilityDistribution;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -13,10 +13,8 @@ public class SimulationConfigs {
     public static SimulationConfigs instance = new SimulationConfigs();
 
     private int outdoorQueueCapacity;
-    private int indoorQueueCapacity;
     private double cashCustomerProbability;
-    private ArrayList<Range> timeBetweenArrivalRanges;
-    private Map<Integer, Double> timeBetweenArrivalProbability;
+    private ProbabilityDistribution timeBetweenArrivalDistribution;
     private List<EmployeeData> employeeData;
 
     private SimulationConfigs() {
@@ -25,41 +23,39 @@ public class SimulationConfigs {
 
     public void resetParamsToDefault() {
         outdoorQueueCapacity = 2;
-        indoorQueueCapacity = Integer.MAX_VALUE;
         cashCustomerProbability = 0.7;
 
-        timeBetweenArrivalProbability = new HashMap<>(Map.of(
+        timeBetweenArrivalDistribution = new ProbabilityDistribution(new LinkedHashMap<>(Map.of(
                 0, 0.15,
                 1, 0.25,
                 2, 0.25,
                 3, 0.35
-        ));
-        updateTimeBetweenArrivalRanges();
+        )));
 
         employeeData = new ArrayList<>();
-        EmployeeData outdoorTeller = new EmployeeData(
+        EmployeeData outdoorTellerData = new EmployeeData(
                 EmployeeData.Area.OUTDOOR,
                 CASH,
                 "outdoor_teller_1",
                 getDefaultTellerProbability()
         );
-        EmployeeData indoorTeller = new EmployeeData(
+        EmployeeData indoorTellerData = new EmployeeData(
                 EmployeeData.Area.INDOOR,
                 CASH,
                 "indoor_teller_1",
                 getDefaultTellerProbability()
         );
 
-        EmployeeData indoorServiceEmployeeData = new EmployeeData(
+        EmployeeData serviceEmployeeData = new EmployeeData(
                 EmployeeData.Area.INDOOR,
                 SERVICE,
-                "indoor_service_1",
+                "service_emp_1",
                 getDefaultServiceEmployeeProbability()
         );
 
-        employeeData.add(outdoorTeller);
-        employeeData.add(indoorTeller);
-        employeeData.add(indoorServiceEmployeeData);
+        employeeData.add(outdoorTellerData);
+        employeeData.add(indoorTellerData);
+        employeeData.add(serviceEmployeeData);
     }
 
     public Map<Integer, Double> getDefaultTellerProbability() {
@@ -76,14 +72,6 @@ public class SimulationConfigs {
             put(6, 0.5);
             put(8, 0.3);
         }};
-    }
-
-    public int getIndoorQueueCapacity() {
-        return indoorQueueCapacity;
-    }
-
-    public void setIndoorQueueCapacity(int indoorQueueCapacity) {
-        this.indoorQueueCapacity = indoorQueueCapacity;
     }
 
     public int getOutdoorQueueCapacity() {
@@ -106,58 +94,37 @@ public class SimulationConfigs {
         this.cashCustomerProbability = cashCustomerProbability;
     }
 
-    public double getServiceCustomerProbability() {
-        return (1 - cashCustomerProbability);
-    }
-
-    public List<EmployeeData> getIndoorServiceEmployees() {
+    public List<EmployeeData> getIndoorServiceEmployeesData() {
         return employeeData
                 .stream()
                 .filter(e -> e.getType().equals(SERVICE) && e.getArea().equals(EmployeeData.Area.INDOOR))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public List<EmployeeData> getOutdoorCashEmployees() {
+    public List<EmployeeData> getOutdoorCashEmployeesData() {
         return employeeData
                 .stream()
                 .filter(e -> e.getType().equals(CASH) && e.getArea().equals(EmployeeData.Area.OUTDOOR))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public List<EmployeeData> getIndoorCashEmployees() {
+    public List<EmployeeData> getIndoorCashEmployeesData() {
         return employeeData
                 .stream()
                 .filter(e -> e.getType().equals(CASH) && e.getArea().equals(EmployeeData.Area.INDOOR))
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    public Map<Integer, Double> getTimeBetweenArrivalProbability() {
-        return timeBetweenArrivalProbability;
+    public void setTimeBetweenArrivalProbabilities(Map<Integer, Double> timeBetweenArrivalDistribution) {
+        this.timeBetweenArrivalDistribution = new ProbabilityDistribution(timeBetweenArrivalDistribution);
     }
 
-    public void setTimeBetweenArrivalProbability(Map<Integer, Double> timeBetweenArrivalProbability) {
-        this.timeBetweenArrivalProbability = timeBetweenArrivalProbability;
-        updateTimeBetweenArrivalRanges();
+    public ProbabilityDistribution getTimeBetweenArrivalDistribution() {
+        return timeBetweenArrivalDistribution;
     }
 
-    private void updateTimeBetweenArrivalRanges() {
-        timeBetweenArrivalRanges = new ArrayList<>();
-        double lastProbability = 0.0;
-        for (var entry : timeBetweenArrivalProbability.entrySet()) {
-            // No need to add onto the last probability because it'll be avoided due to findFirst being used
-            timeBetweenArrivalRanges.add(new Range(lastProbability , lastProbability + entry.getValue(), entry.getKey()));
-            lastProbability += entry.getValue();
-        }
 
-        if (lastProbability > 1)
-            throw new ArithmeticException("Time between arrivals probabilities are out of range");
-    }
-
-    public int getTimeBetweenArrival(double probability) {
-        return timeBetweenArrivalRanges.stream()
-                .filter(range -> range.contains(probability))
-                .findFirst()
-                .map(Range::value)
-                .orElseThrow();
+    public Map<Integer, Double> getTimeBetweenArrivalProbabilities() {
+        return timeBetweenArrivalDistribution.getProbabilities();
     }
 }

@@ -19,7 +19,7 @@ public class EventPrinter implements SimulationListener{
         String description = simulationEventRecord.description();
         SimulationEventRecord.Type type = simulationEventRecord.type();
 
-        String empName = (e == null) ? "-" : e.employeeData.toString();
+        String empName = (e == null) ? "-" : e.getEmployeeData().toString();
         String queues = String.format("O:%d | I:%d | S:%d",
                 outdoorTellerQueueSize,
                 indoorTellerQueueSize,

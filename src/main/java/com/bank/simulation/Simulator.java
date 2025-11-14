@@ -11,8 +11,14 @@ public class Simulator {
 
     private final Random rand = new Random();
     private final SimulationConfigs configs = SimulationConfigs.instance;
-    private final SimulationStatistics stats = new SimulationStatistics();
     private final ArrayList<SimulationListener> listeners = new ArrayList<>();
+
+    private List<EmployeeData> outdoorTellersData;
+    private List<EmployeeData> indoorTellersData;
+    private List<EmployeeData> serviceEmployeesData;
+    private int outdoorQueueCapacity;
+    private ProbabilityDistribution timeBetweenArrivalDistribution;
+    private boolean shouldDispatchEvent;
 
     private final PriorityQueue<SimulationEvent> events = new PriorityQueue<>();
 
@@ -20,29 +26,41 @@ public class Simulator {
     private final Queue<Customer> indoorTellerQueue = new LinkedList<>();
     private final Queue<Customer> serviceEmployeeQueue = new LinkedList<>();
 
-    private List<Employee> outdoorTellersStatus;
-    private List<Employee> indoorTellersStatus;
-    private List<Employee> serviceEmployeesStatus;
+    private List<Employee> outdoorTellers;
+    private List<Employee> indoorTellers;
+    private List<Employee> serviceEmployees;
 
-    private final int outdoorQueueCapacity = configs.getOutdoorQueueCapacity();
 
     private int currentTime = 0;
+    private SimulationStatistics currentStats;
 
     public Simulator() {
     }
 
     public void startSimulation() {
-        List<EmployeeData> outdoorTellers = configs.getOutdoorCashEmployees();
-        List<EmployeeData> indoorTellers = configs.getIndoorCashEmployees();
-        List<EmployeeData> serviceEmp = configs.getIndoorServiceEmployees();
+        outdoorTellersData = configs.getOutdoorCashEmployeesData();
+        indoorTellersData = configs.getIndoorCashEmployeesData();
+        serviceEmployeesData = configs.getIndoorServiceEmployeesData();
+        outdoorQueueCapacity = configs.getOutdoorQueueCapacity();
+        timeBetweenArrivalDistribution = configs.getTimeBetweenArrivalDistribution();
 
-        outdoorTellersStatus = outdoorTellers.stream().map(e -> new Employee(e, outdoorTellerQueue)).toList();
-        indoorTellersStatus = indoorTellers.stream().map(e -> new Employee(e, indoorTellerQueue)).toList();
-        serviceEmployeesStatus = serviceEmp.stream().map(e -> new Employee(e, serviceEmployeeQueue)).toList();
+        shouldDispatchEvent = true;
+        runSingleSimulation();
+        shouldDispatchEvent = false;
 
+        System.out.println("Simulation statistics: \n" + currentStats);
+    }
+
+    private void runSingleSimulation() {
         currentTime = 0;
+        currentStats = new SimulationStatistics();
+
+        outdoorTellers = outdoorTellersData.stream().map(e -> new Employee(e, outdoorTellerQueue)).toList();
+        indoorTellers = indoorTellersData.stream().map(e -> new Employee(e, indoorTellerQueue)).toList();
+        serviceEmployees = serviceEmployeesData.stream().map(e -> new Employee(e, serviceEmployeeQueue)).toList();
+
         for (int i = 0; i < simulationCustomersCount; i++) {
-            int timeBetweenCustomer = configs.getTimeBetweenArrival(rand.nextDouble());
+            int timeBetweenCustomer = timeBetweenArrivalDistribution.getProbabilityValue(rand.nextDouble());
             int arrivalTime = currentTime + timeBetweenCustomer;
 
             ServiceType serviceType = rand.nextDouble() <= configs.getCashCustomerProbability()
@@ -66,6 +84,30 @@ public class Simulator {
                 handleDeparture(event);
             }
         }
+
+        currentStats.setTotalTime(currentTime);
+
+        outdoorTellers.forEach(e -> e.updateTotalIdle(currentTime));
+        currentStats.setTotalOutdoorTellerIdleTime(
+                outdoorTellers.stream()
+                        .map(Employee::getTotalIdle)
+                        .reduce(0, Integer::sum)
+        );
+
+        indoorTellers.forEach(e -> e.updateTotalIdle(currentTime));
+        currentStats.setTotalIndoorTellerIdleTime(
+                indoorTellers.stream()
+                        .map(Employee::getTotalIdle)
+                        .reduce(0, Integer::sum)
+        );
+
+        serviceEmployees.forEach(e -> e.updateTotalIdle(currentTime));
+        currentStats.setTotalServiceEmployeeIdleTime(
+                serviceEmployees.stream()
+                        .map(Employee::getTotalIdle)
+                        .reduce(0, Integer::sum)
+        );
+
     }
 
     private void handleArrival(SimulationEvent event) {
@@ -84,45 +126,69 @@ public class Simulator {
             printEvent(SimulationEventRecord.Type.ROUTE, event, "Outdoor queue full → reroute indoor");
             routeToIndoorTeller(event);
         } else {
-            Employee availableEmployee = outdoorTellersStatus.stream().filter(e -> e.isIdle).findFirst().orElse(null);
+            Employee availableEmployee = outdoorTellers.stream().filter(Employee::isIdle).findFirst().orElse(null);
             if (availableEmployee != null) {
                 serveCustomer(c, availableEmployee);
             } else {
                 outdoorTellerQueue.offer(c);
                 printEvent(SimulationEventRecord.Type.QUEUE, event, "Joined outdoor queue");
+                currentStats.addOutdoorTellerWaitingCustomer();
+                currentStats.updateOutdoorTellerMaxQueueSize(outdoorTellerQueue.size());
             }
+
+            currentStats.addOutdoorTellerCustomer();
         }
     }
 
     private void routeToIndoorTeller(SimulationEvent event) {
         Customer c = event.getCustomer();
-        Employee availableEmployee = indoorTellersStatus.stream().filter(e -> e.isIdle).findFirst().orElse(null);
+        Employee availableEmployee = indoorTellers.stream().filter(Employee::isIdle).findFirst().orElse(null);
         if (availableEmployee != null) {
             serveCustomer(c, availableEmployee);
         } else {
             indoorTellerQueue.offer(c);
             printEvent(SimulationEventRecord.Type.QUEUE, event, "Joined indoor teller queue");
+            currentStats.addIndoorTellerWaitingCustomer();
+            currentStats.updateIndoorTellerMaxQueueSize(indoorTellerQueue.size());
         }
+
+        currentStats.addIndoorTellerCustomer();
     }
 
     private void routeToServiceEmployee(SimulationEvent event) {
         Customer c = event.getCustomer();
-        Employee availableEmployee = serviceEmployeesStatus.stream().filter(e -> e.isIdle).findFirst().orElse(null);
+        Employee availableEmployee = serviceEmployees.stream().filter(Employee::isIdle).findFirst().orElse(null);
         if (availableEmployee != null) {
             serveCustomer(c, availableEmployee);
         } else {
             serviceEmployeeQueue.offer(c);
             printEvent(SimulationEventRecord.Type.QUEUE, event, "Joined service employee queue");
+            currentStats.addServiceEmployeeWaitingCustomer();
+            currentStats.updateServiceEmployeeMaxQueueSize(serviceEmployeeQueue.size());
         }
+
+        currentStats.addServiceEmployeeCustomer();
     }
 
     private void serveCustomer(Customer customer, Employee employee) {
         customer.setServiceTimeStart(currentTime);
         employee.setBusy(currentTime);
 
-        EmployeeData employeeData = employee.employeeData;
+        EmployeeData employeeData = employee.getEmployeeData();
         int serviceTime = employeeData.getServiceTime(rand.nextDouble());
         int departureTime = currentTime + serviceTime;
+
+        if (employeeData.getType() == ServiceType.CASH) {
+            currentStats.addTotalCashServiceTime(serviceTime);
+            if (employeeData.getArea() == EmployeeData.Area.OUTDOOR) {
+                currentStats.addTotalOutdoorTellerWaitTime(currentTime - customer.arrivalTime());
+            } else {
+                currentStats.addTotalIndoorTellerWaitTime(currentTime - customer.arrivalTime());
+            }
+        } else {
+            currentStats.addTotalServiceServiceTime(serviceTime);
+            currentStats.addTotalServiceEmployeeWaitTime(currentTime - customer.arrivalTime());
+        }
 
         SimulationEvent event = new SimulationEvent(SimulationEvent.Type.DEPARTURE, departureTime, customer, employee);
 
@@ -138,21 +204,11 @@ public class Simulator {
         employee.setIdle(currentTime);
         printEvent(SimulationEventRecord.Type.DEPART, event, "Service completed");
 
-        Queue<Customer> assignedQueue = employee.assignedQueue;
+        Queue<Customer> assignedQueue = employee.getAssignedQueue();
         if (!assignedQueue.isEmpty()) {
             Customer next = assignedQueue.poll();
             printEvent(SimulationEventRecord.Type.NEXT, event, "Next customer begins service");
             serveCustomer(next, employee);
-        }
-    }
-
-    public void addListener(SimulationListener listener) {
-        listeners.add(listener);
-    }
-
-    private void dispatch(SimulationEventRecord event) {
-        for (SimulationListener listener : listeners) {
-            listener.onEvent(event);
         }
     }
 
@@ -167,6 +223,18 @@ public class Simulator {
                 currentTime
         );
         dispatch(eventRecord);
+    }
+
+    public void addListener(SimulationListener listener) {
+        listeners.add(listener);
+    }
+
+    private void dispatch(SimulationEventRecord event) {
+        if (!shouldDispatchEvent) return;
+
+        for (SimulationListener listener : listeners) {
+            listener.onEvent(event);
+        }
     }
 
     public void setSimulationRetries(int simulationRetries) {
