@@ -41,15 +41,15 @@ public class SimulationPageController {
     }
 
     private void startSimulation() {
+        view.clearSimulationResults();
+        simulationEventsTable.clearEvents();
+
         simulator.setSimulationCustomersCount(Integer.parseInt(simulationParamFields.get("simulation_customers").getText()));
         simulator.setSimulationDays(Integer.parseInt(simulationParamFields.get("simulation_days").getText()));
         simulator.setSimulationRetries(Integer.parseInt(simulationParamFields.get("simulation_repetition").getText()));
 
         simulator.startSimulation();
 
-        view.clearSimulationResults();
-
-        simulationEventsTable.clearEvents();
         firstDayStatsTable.setStatistics(simulator.getFirstDayStats().getStatistics());
         firstBatchStatsTable.setStatistics(simulator.getFirstBatchStats().getStatistics());
         totalStatsTable.setStatistics(simulator.getTotalStats().getStatistics());
