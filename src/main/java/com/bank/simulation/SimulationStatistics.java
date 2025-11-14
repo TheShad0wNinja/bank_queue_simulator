@@ -29,7 +29,23 @@ public class SimulationStatistics {
     private int totalOutdoorTellerIdleTime = 0;
     private int totalServiceEmployeeIdleTime = 0;
 
+    private int indoorTellersCount = 1;
+    private int outdoorTellersCount = 1;
+    private int serviceEmployeesCount = 1;
+
     private ArrayList<Statistic> statistics;
+
+    public void setServiceEmployeesCount(int serviceEmployeesCount) {
+        this.serviceEmployeesCount = serviceEmployeesCount;
+    }
+
+    public void setOutdoorTellersCount(int outdoorTellersCount) {
+        this.outdoorTellersCount = outdoorTellersCount;
+    }
+
+    public void setIndoorTellersCount(int indoorTellersCount) {
+        this.indoorTellersCount = indoorTellersCount;
+    }
 
     public void addTotalCashServiceTime(int time) {
         totalCashServiceTime += time;
@@ -151,9 +167,9 @@ public class SimulationStatistics {
         statistics.add(new Statistic("Service Employee Wait Probability", String.format("%.1f%%", probServiceWait * 100)));
 
         // State 5
-        double indoorIdlePortion = totalTime == 0 ? 0 : totalIndoorTellerIdleTime / (double) totalTime;
-        double outdoorIdlePortion = totalTime == 0 ? 0 : totalOutdoorTellerIdleTime / (double) totalTime;
-        double serviceIdlePortion = totalTime == 0 ? 0 : totalServiceEmployeeIdleTime / (double) totalTime;
+        double indoorIdlePortion = totalTime == 0 ? 0 : totalIndoorTellerIdleTime / (double) (totalTime * indoorTellersCount);
+        double outdoorIdlePortion = totalTime == 0 ? 0 : totalOutdoorTellerIdleTime / (double) (totalTime * outdoorTellersCount);
+        double serviceIdlePortion = totalTime == 0 ? 0 : totalServiceEmployeeIdleTime / (double) (totalTime * serviceEmployeesCount) ;
 
         statistics.add(new Statistic("Indoor Tellers Idle Portion", String.format("%.1f%%", indoorIdlePortion * 100)));
         statistics.add(new Statistic("Outdoor Tellers Idle Portion", String.format("%.1f%%", outdoorIdlePortion * 100)));
@@ -184,6 +200,10 @@ public class SimulationStatistics {
         this.totalIndoorTellerIdleTime += stats.totalIndoorTellerIdleTime;
         this.totalOutdoorTellerIdleTime += stats.totalOutdoorTellerIdleTime;
         this.totalServiceEmployeeIdleTime += stats.totalServiceEmployeeIdleTime;
+
+        this.indoorTellersCount = stats.indoorTellersCount;
+        this.outdoorTellersCount = stats.outdoorTellersCount;
+        this.serviceEmployeesCount = stats.serviceEmployeesCount;
     }
 
     public ArrayList<Statistic> getStatistics() {

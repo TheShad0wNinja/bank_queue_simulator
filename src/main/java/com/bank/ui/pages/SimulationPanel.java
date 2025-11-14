@@ -3,10 +3,14 @@ package com.bank.ui.pages;
 import com.bank.controllers.SimulationPanelController;
 import com.bank.ui.Theme;
 import com.bank.ui.components.*;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class SimulationPanel extends JPanel {
@@ -17,6 +21,8 @@ public class SimulationPanel extends JPanel {
     private SimulationStatisticsTable firstDayStats;
     private SimulationStatisticsTable firstBatchStats;
     private SimulationStatisticsTable totalStats;
+    private final List<Component> chartComponents = new ArrayList<>();
+
 
     public SimulationPanel() {
         setLayout(new BorderLayout());
@@ -163,6 +169,25 @@ public class SimulationPanel extends JPanel {
         simulationResultsPanel.add(statsTable);
     }
 
+    public void addChart(String title, JFreeChart chart) {
+        JLabel lbl = new JLabel(title);
+        lbl.setFont(Theme.TITLE_FONT);
+        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new Dimension(900, 400));
+        chartPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+
+        chartComponents.add(simulationResultsPanel.add(Box.createVerticalStrut(30)));
+        chartComponents.add(simulationResultsPanel.add(lbl));
+        chartComponents.add(simulationResultsPanel.add(Box.createVerticalStrut(10)));
+        chartComponents.add(simulationResultsPanel.add(chartPanel));
+
+        simulationResultsPanel.revalidate();
+        simulationResultsPanel.repaint();
+    }
+
     public void clearSimulationResults() {
         if (simulationEventsTable != null) {
             simulationEventsTable.clearEvents();
@@ -176,6 +201,10 @@ public class SimulationPanel extends JPanel {
         if (totalStats != null) {
             totalStats.clearStatistics();
         }
+        for (Component comp : chartComponents) {
+            simulationResultsPanel.remove(comp);
+        }
+        chartComponents.clear();
     }
 
     public Map<String, JTextField> addSimulationParameter(Map<String, String> parameters) {

@@ -135,6 +135,9 @@ public class Simulator {
                         .reduce(0, Integer::sum)
         );
 
+        currentStats.setIndoorTellersCount(outdoorTellers.size());
+        currentStats.setOutdoorTellersCount(outdoorTellers.size());
+        currentStats.setServiceEmployeesCount(serviceEmployees.size());
     }
 
     private void handleArrival(SimulationEvent event) {
