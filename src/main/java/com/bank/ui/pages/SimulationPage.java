@@ -3,6 +3,7 @@ package com.bank.ui.pages;
 import com.bank.controllers.SimulationPageController;
 import com.bank.ui.Theme;
 import com.bank.ui.components.*;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 
@@ -22,26 +23,25 @@ public class SimulationPage extends JPanel {
         setBackground(Theme.BACKGROUND);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        JLabel header = new JLabel("Simulation");
-        header.setFont(Theme.HEADER_FONT);
-        add(header, BorderLayout.NORTH);
-
         JPanel content = new JPanel();
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
         content.setBackground(Theme.BACKGROUND);
-        content.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel title = new JLabel("Simulation Parameters");
-        title.setFont(Theme.TITLE_FONT);
-        title.setAlignmentX(Component.LEFT_ALIGNMENT);
-        content.add(Box.createVerticalStrut(30));
-        content.add(title);
+        JLabel header = new JLabel("Simulation");
+        header.setFont(Theme.HEADER_FONT);
+        content.add(header);
+        content.add(Box.createVerticalStrut(40));
+
+        JLabel simulationParametersLabel = new JLabel("Simulation Parameters");
+        simulationParametersLabel.setFont(Theme.TITLE_FONT);
+        simulationParametersLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        content.add(simulationParametersLabel);
         content.add(Box.createVerticalStrut(5));
         content.add(prepareSimulationParametersPanel());
         content.add(Box.createVerticalStrut(20));
 
         content.add(prepareSimulationStartButton());
-        content.add(Box.createVerticalStrut(30));
+        content.add(Box.createVerticalStrut(40));
 
         simulationResultsLabel = new JLabel("Simulation Results");
         simulationResultsLabel.setFont(Theme.TITLE_FONT);
@@ -57,7 +57,7 @@ public class SimulationPage extends JPanel {
     }
 
     private JButton prepareSimulationStartButton() {
-        startSimulationButton = new ThemeButton("Start Simulation", ThemeButton.Variant.PRIMARY);
+        startSimulationButton = new ThemeButton("Start Simulation", ThemeButton.Variant.PRIMARY, true, GoogleMaterialDesignIcons.PLAY_CIRCLE_OUTLINE);
         startSimulationButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         return startSimulationButton;
     }
@@ -79,7 +79,7 @@ public class SimulationPage extends JPanel {
     private JPanel prepareSimulationResultsPanel() {
         simulationResultsPanel = new ThemePanel();
         simulationResultsPanel.setLayout(new BoxLayout(simulationResultsPanel, BoxLayout.Y_AXIS));
-        simulationResultsPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        simulationResultsPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 30, 20));
         simulationResultsPanel.setVisible(false);
         simulationResultsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         return simulationResultsPanel;

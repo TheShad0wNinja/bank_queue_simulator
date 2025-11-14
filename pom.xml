@@ -15,11 +15,20 @@
     </properties>
 
     <dependencies>
-        <!-- JFreeChart for data visualization -->
+        <dependency>
+            <groupId>com.github.jiconfont</groupId>
+            <artifactId>jiconfont-google_material_design_icons</artifactId>
+            <version>2.2.0.2</version>
+        </dependency>
         <dependency>
             <groupId>org.jfree</groupId>
             <artifactId>jfreechart</artifactId>
             <version>1.5.6</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jiconfont</groupId>
+            <artifactId>jiconfont-swing</artifactId>
+            <version>1.0.0</version>
         </dependency>
     </dependencies>
 

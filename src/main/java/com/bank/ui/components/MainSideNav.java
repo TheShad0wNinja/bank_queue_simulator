@@ -1,64 +1,97 @@
 package com.bank.ui.components;
 
 import com.bank.ui.Theme;
+import com.bank.utils.TextUtils;
+import jiconfont.icons.google_material_design_icons.GoogleMaterialDesignIcons;
+import jiconfont.swing.IconFontSwing;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class MainSideNav extends ThemePanel {
     private Consumer<String> onSelect;
-    private String[] pages;
     private ThemeToggledButton currentPage;
+
+    private static final Map<String, GoogleMaterialDesignIcons> PAGE_ICONS = new HashMap<>();
+    static {
+        PAGE_ICONS.put("simulation", GoogleMaterialDesignIcons.PLAY_CIRCLE_OUTLINE);
+        PAGE_ICONS.put("settings", GoogleMaterialDesignIcons.SETTINGS);
+        PAGE_ICONS.put("history", GoogleMaterialDesignIcons.DASHBOARD);
+    }
 
     public void setOnSelect(Consumer<String> onSelect) {
         this.onSelect = onSelect;
     }
 
     public MainSideNav(String[] pages, String defaultPage) {
-        setLayout(new GridBagLayout());
-        setBackground(Theme.PANEL_BG);
-        setPreferredSize(new Dimension(250, Integer.MAX_VALUE));
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.BOTH;
-        c.anchor = GridBagConstraints.NORTH;
-        c.weightx = 1.0;
-        c.weighty = 0.0;
-        c.gridx = 0;
-        c.gridy = 0;
+        setLayout(new BorderLayout());
+        setBackground(Theme.PANEL_BG);
+        setPreferredSize(new Dimension(250, 0));
+
+        JPanel content = new JPanel();
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+        content.setBackground(Theme.PANEL_BG);
+        content.setBorder(BorderFactory.createEmptyBorder(20, 16, 20, 16));
+
         JLabel logo = new JLabel("Bank Queue Sim");
         logo.setFont(Theme.TITLE_FONT);
-        c.insets = new Insets(10, 20, 10, 20);
-        add(logo, c);
+        logo.setAlignmentX(Component.LEFT_ALIGNMENT);
+        content.add(logo);
+        content.add(Box.createVerticalStrut(40));
 
-        add(Box.createVerticalStrut(100));
-
-        c.insets = new Insets(1, 20, 1, 20);
-        int i = 1;
         for (String page : pages) {
-            ThemeToggledButton btn = new ThemeToggledButton(page.substring(0, 1).toUpperCase() + page.substring(1));
+            ThemeToggledButton btn = createNavButton(page);
+
             if (page.equals(defaultPage)) {
                 currentPage = btn;
                 currentPage.toggle();
             }
 
-            btn.addActionListener(e -> {
-                if (btn.equals(currentPage)) {return;}
+            btn.setAlignmentX(Component.LEFT_ALIGNMENT);
+            btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+            btn.setPreferredSize(new Dimension(218, 44));
 
-                currentPage.toggle();
-                currentPage = btn;
-                currentPage.toggle();
-
-                onSelect.accept(page);
-            });
-
-            c.gridy = i++;
-            add(btn, c);
+            content.add(btn);
+            content.add(Box.createVerticalStrut(8));
         }
 
-        c.gridy = i + 1;
-        c.weighty = 1;
-        add(Box.createVerticalGlue(), c);
+        content.add(Box.createVerticalGlue());
+
+        add(content, BorderLayout.CENTER);
     }
-}
+
+    private ThemeToggledButton createNavButton(String page) {
+        String label = TextUtils.capitalize(page);
+
+        GoogleMaterialDesignIcons icon = PAGE_ICONS.get(page.toLowerCase());
+
+        ThemeToggledButton btn = icon != null
+                ? new ThemeToggledButton(label, icon, 18)
+                : new ThemeToggledButton(label);
+
+        btn.setHorizontalAlignment(SwingConstants.LEFT);
+        btn.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
+
+        btn.addActionListener(e -> {
+            if (btn.equals(currentPage)) {
+                return;
+            }
+
+            if (currentPage != null) {
+                currentPage.toggle();
+            }
+
+            currentPage = btn;
+            currentPage.toggle();
+
+            if (onSelect != null) {
+                onSelect.accept(page);
+            }
+        });
+
+        return btn;
+    }}
