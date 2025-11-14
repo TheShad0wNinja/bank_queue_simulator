@@ -34,27 +34,30 @@ public class SimulationPageController {
 
     private void loadParams() {
         simulationParamFields = view.addSimulationParameter(new LinkedHashMap<>(){{
-                put("simulation_days", "Simulation Days");
-                put("simulation_customers", "Customers per Day");
-                put("simulation_repetition", "Simulation Repetition");
+            put("simulation_days", "Simulation Days");
+            put("simulation_customers", "Customers per Day");
+            put("simulation_repetition", "Simulation Repetition");
         }});
-        view.setSimulationEventsTable(simulationEventsTable);
-        view.setFirstDayResultsTable(firstDayStatsTable);
-        view.setFirstBatchStats(firstBatchStatsTable);
-        view.setTotalStats(totalStatsTable);
     }
 
     private void startSimulation() {
-        view.clearSimulationResults();
-
         simulator.setSimulationCustomersCount(Integer.parseInt(simulationParamFields.get("simulation_customers").getText()));
         simulator.setSimulationDays(Integer.parseInt(simulationParamFields.get("simulation_days").getText()));
         simulator.setSimulationRetries(Integer.parseInt(simulationParamFields.get("simulation_repetition").getText()));
 
         simulator.startSimulation();
+
+        view.clearSimulationResults();
+
+        simulationEventsTable.clearEvents();
         firstDayStatsTable.setStatistics(simulator.getFirstDayStats().getStatistics());
         firstBatchStatsTable.setStatistics(simulator.getFirstBatchStats().getStatistics());
         totalStatsTable.setStatistics(simulator.getTotalStats().getStatistics());
+
+        view.addDataTable("First Run's Simulation Events", simulationEventsTable, 400);
+        view.addDataTable("First Run Statistics", firstDayStatsTable, 300);
+        view.addDataTable("First Batch Statistics", firstBatchStatsTable, 300);
+        view.addDataTable("Total Statistics", totalStatsTable, 300);
 
         view.addChart("Average Service Times", createAvgServiceTimeChart());
         view.addChart("Average Wait Times", createAvgWaitTimesChart());
@@ -62,9 +65,7 @@ public class SimulationPageController {
         view.addChart("Wait Probability Distribution", createWaitProbabilityPieChart());
         view.addChart("Idle vs Busy Portion", createIdlePortionChart());
 
-
         view.showResults();
-
         showSuccessMessage("Simulation Finished!");
     }
 
@@ -189,7 +190,6 @@ public class SimulationPageController {
             return 0;
         }
     }
-
 
     private void setupActions() {
         view.setStartButtonAction(action -> startSimulation());

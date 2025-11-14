@@ -8,21 +8,14 @@ import org.jfree.chart.JFreeChart;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class SimulationPage extends JPanel {
     private JPanel simulationParamsPanel;
     private JButton startSimulationButton;
     private JPanel simulationResultsPanel;
-    private SimulationEventsTable simulationEventsTable;
-    private SimulationStatisticsTable firstDayStats;
-    private SimulationStatisticsTable firstBatchStats;
-    private SimulationStatisticsTable totalStats;
-    private final List<Component> chartComponents = new ArrayList<>();
-
+    private JLabel simulationResultsLabel;
 
     public SimulationPage() {
         setLayout(new BorderLayout());
@@ -31,49 +24,32 @@ public class SimulationPage extends JPanel {
 
         JLabel header = new JLabel("Simulation");
         header.setFont(Theme.HEADER_FONT);
-
         add(header, BorderLayout.NORTH);
 
         JPanel content = new JPanel();
-        content.setLayout(new GridBagLayout());
+        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
         content.setBackground(Theme.BACKGROUND);
+        content.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        GridBagConstraints c = new GridBagConstraints();
-
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.weightx = 1.0;
-        c.weighty = 0.0;
-        c.gridx = 0;
-        c.gridy = 0;
-        c.insets = new Insets(30, 0, 5, 0);
         JLabel title = new JLabel("Simulation Parameters");
         title.setFont(Theme.TITLE_FONT);
-        title.setHorizontalAlignment(SwingConstants.LEFT);
-        content.add(title, c);
+        title.setAlignmentX(Component.LEFT_ALIGNMENT);
+        content.add(Box.createVerticalStrut(30));
+        content.add(title);
+        content.add(Box.createVerticalStrut(5));
+        content.add(prepareSimulationParametersPanel());
+        content.add(Box.createVerticalStrut(20));
 
-        c.gridy++;
-        c.insets = new Insets(5, 0, 0, 0);
-        content.add(prepareSimulationParametersPanel(), c);
+        content.add(prepareSimulationStartButton());
+        content.add(Box.createVerticalStrut(30));
 
-        c.gridy++;
-        c.insets = new Insets(20, 0, 0, 0);
-        content.add(prepareSimulationStartButton(), c);
-
-        c.gridy++;
-        c.insets = new Insets(30, 0, 5, 0);
-        JLabel simResultsTitle = new JLabel("Simulation Results");
-        simResultsTitle.setFont(Theme.TITLE_FONT);
-        simResultsTitle.setHorizontalAlignment(SwingConstants.LEFT);
-        content.add(simResultsTitle, c);
-
-        c.gridy++;
-        c.insets = new Insets(5, 0, 0, 0);
-        content.add(prepareSimulationResultsPanel(), c);
-
-        c.gridy++;
-        c.fill = GridBagConstraints.BOTH;
-        c.weighty = 1.0;
-        content.add(Box.createVerticalGlue(), c);
+        simulationResultsLabel = new JLabel("Simulation Results");
+        simulationResultsLabel.setFont(Theme.TITLE_FONT);
+        simulationResultsLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        simulationResultsLabel.setVisible(false);
+        content.add(simulationResultsLabel);
+        content.add(Box.createVerticalStrut(5));
+        content.add(prepareSimulationResultsPanel());
 
         add(content, BorderLayout.CENTER);
 
@@ -82,20 +58,21 @@ public class SimulationPage extends JPanel {
 
     private JButton prepareSimulationStartButton() {
         startSimulationButton = new ThemeButton("Start Simulation", ThemeButton.Variant.PRIMARY);
-
+        startSimulationButton.setAlignmentX(Component.LEFT_ALIGNMENT);
         return startSimulationButton;
     }
 
     private JPanel prepareSimulationParametersPanel() {
         ThemePanel panel = new ThemePanel();
         panel.setLayout(new BorderLayout());
-        panel.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        simulationParamsPanel = new JPanel();
-        simulationParamsPanel.setLayout(new GridBagLayout());
+        simulationParamsPanel = new JPanel(new GridLayout(0, 2, 10, 10));
         simulationParamsPanel.setBackground(Theme.PANEL_BG);
 
         panel.add(simulationParamsPanel, BorderLayout.CENTER);
+
         return panel;
     }
 
@@ -104,149 +81,74 @@ public class SimulationPage extends JPanel {
         simulationResultsPanel.setLayout(new BoxLayout(simulationResultsPanel, BoxLayout.Y_AXIS));
         simulationResultsPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         simulationResultsPanel.setVisible(false);
+        simulationResultsPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
         return simulationResultsPanel;
     }
 
-    public void setSimulationEventsTable(SimulationEventsTable simulationEventsTable) {
-        this.simulationEventsTable = simulationEventsTable;
+    public void addDataTable(String title, JPanel tablePanel, int height) {
+        JLabel label = new JLabel(title);
+        label.setFont(Theme.TITLE_FONT);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JLabel title = new JLabel("First Run's Simulation Events");
-        title.setFont(Theme.TITLE_FONT);
-        title.setAlignmentX(Component.LEFT_ALIGNMENT);
-        simulationResultsPanel.add(title);
+        tablePanel.setPreferredSize(new Dimension(900, height));
+        tablePanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, height));
+        tablePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        simulationResultsPanel.add(Box.createVerticalStrut(10));
-
-        simulationEventsTable.setAlignmentX(Component.LEFT_ALIGNMENT);
-        simulationResultsPanel.add(simulationEventsTable);
-    }
-
-    public void setFirstDayResultsTable(SimulationStatisticsTable statsTable) {
-        this.firstDayStats = statsTable;
-
-        JLabel title = new JLabel("First Run Statistics");
-        title.setFont(Theme.TITLE_FONT);
-        title.setAlignmentX(Component.LEFT_ALIGNMENT);
         simulationResultsPanel.add(Box.createVerticalStrut(30));
-        simulationResultsPanel.add(title);
-
+        simulationResultsPanel.add(label);
         simulationResultsPanel.add(Box.createVerticalStrut(10));
+        simulationResultsPanel.add(tablePanel);
 
-        statsTable.setAlignmentX(Component.LEFT_ALIGNMENT);
-        simulationResultsPanel.add(statsTable);
-    }
-
-    public void setFirstBatchStats(SimulationStatisticsTable statsTable) {
-        this.firstBatchStats = statsTable;
-
-        JLabel title = new JLabel("First Batch Statistics");
-        title.setFont(Theme.TITLE_FONT);
-        title.setAlignmentX(Component.LEFT_ALIGNMENT);
-        simulationResultsPanel.add(Box.createVerticalStrut(30));
-        simulationResultsPanel.add(title);
-
-        simulationResultsPanel.add(Box.createVerticalStrut(10));
-
-        statsTable.setAlignmentX(Component.LEFT_ALIGNMENT);
-        simulationResultsPanel.add(statsTable);
-    }
-
-    public void setTotalStats(SimulationStatisticsTable statsTable) {
-        this.totalStats = statsTable;
-
-        JLabel title = new JLabel("Total Statistics");
-        title.setFont(Theme.TITLE_FONT);
-        title.setAlignmentX(Component.LEFT_ALIGNMENT);
-        simulationResultsPanel.add(Box.createVerticalStrut(30));
-        simulationResultsPanel.add(title);
-
-        simulationResultsPanel.add(Box.createVerticalStrut(10));
-
-        statsTable.setAlignmentX(Component.LEFT_ALIGNMENT);
-        simulationResultsPanel.add(statsTable);
+        simulationResultsPanel.revalidate();
+        simulationResultsPanel.repaint();
     }
 
     public void addChart(String title, JFreeChart chart) {
-        JLabel lbl = new JLabel(title);
-        lbl.setFont(Theme.TITLE_FONT);
-        lbl.setAlignmentX(Component.LEFT_ALIGNMENT);
+        JLabel label = new JLabel(title);
+        label.setFont(Theme.TITLE_FONT);
+        label.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(900, 400));
+        chartPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 400));
         chartPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-
-        chartComponents.add(simulationResultsPanel.add(Box.createVerticalStrut(30)));
-        chartComponents.add(simulationResultsPanel.add(lbl));
-        chartComponents.add(simulationResultsPanel.add(Box.createVerticalStrut(10)));
-        chartComponents.add(simulationResultsPanel.add(chartPanel));
+        simulationResultsPanel.add(Box.createVerticalStrut(30));
+        simulationResultsPanel.add(label);
+        simulationResultsPanel.add(Box.createVerticalStrut(10));
+        simulationResultsPanel.add(chartPanel);
 
         simulationResultsPanel.revalidate();
         simulationResultsPanel.repaint();
     }
 
     public void clearSimulationResults() {
-        if (simulationEventsTable != null) {
-            simulationEventsTable.clearEvents();
-        }
-        if (firstDayStats != null) {
-            firstDayStats.clearStatistics();
-        }
-        if (firstBatchStats != null) {
-            firstBatchStats.clearStatistics();
-        }
-        if (totalStats != null) {
-            totalStats.clearStatistics();
-        }
-        for (Component comp : chartComponents) {
-            simulationResultsPanel.remove(comp);
-        }
-        chartComponents.clear();
+        simulationResultsPanel.removeAll();
     }
 
     public Map<String, JTextField> addSimulationParameter(Map<String, String> parameters) {
         simulationParamsPanel.removeAll();
-
         Map<String, JTextField> map = new HashMap<>();
 
-        GridBagConstraints c = new GridBagConstraints();
-        c.fill = GridBagConstraints.HORIZONTAL;
-        c.insets = new Insets(10, 20, 0, 20);
-
-        c.gridx = 0;
-        c.gridy = 0;
-        c.gridwidth = 1;
-        c.weightx = 1.0;
-        int columns = 2;
-        int i = 0;
         for (var entry : parameters.entrySet()) {
-            int col = i % columns;
-            int rowPair = (i / columns) * 2;
-
-            c.gridx = col;
-            c.gridy = rowPair + 1;
-            c.insets = new Insets(4, col == 0 ? 20 : 8, 4, col == columns - 1 ? 20 : 8);
+            JPanel panel = new JPanel(new BorderLayout(5, 5));
+            panel.setBackground(Theme.PANEL_BG);
 
             JLabel label = new JLabel(entry.getValue());
             label.setFont(Theme.DEFAULT_FONT);
             label.setForeground(Theme.TEXT_PRIMARY);
-            simulationParamsPanel.add(label, c);
+            panel.add(label, BorderLayout.NORTH);
 
-            c.gridy = rowPair + 2;
-            ThemeTextField field = new ThemeTextField(25);
-            field.setText("10");
-            map.put(entry.getKey(), field);
-            simulationParamsPanel.add(field, c);
-            i++;
+            ThemeTextField textField = new ThemeTextField(25);
+            textField.setText("10");
+            map.put(entry.getKey(), textField);
+            panel.add(textField, BorderLayout.CENTER);
+
+            simulationParamsPanel.add(panel);
         }
 
-        c.gridx = 0;
-        c.gridy += 2;
-        c.gridwidth = 2;
-        c.weighty = 1.0;
-        c.fill = GridBagConstraints.BOTH;
-        simulationParamsPanel.add(Box.createVerticalGlue(), c);
-
+        simulationParamsPanel.revalidate();
+        simulationParamsPanel.repaint();
         return map;
     }
 
@@ -258,7 +160,9 @@ public class SimulationPage extends JPanel {
     }
 
     public void showResults() {
+        simulationResultsLabel.setVisible(true);
         simulationResultsPanel.setVisible(true);
+        simulationResultsPanel.revalidate();
+        simulationResultsPanel.repaint();
     }
-
 }

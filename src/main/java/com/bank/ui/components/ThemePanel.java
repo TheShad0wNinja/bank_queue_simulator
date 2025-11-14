@@ -34,4 +34,9 @@ public class ThemePanel extends JPanel {
         g2.drawRoundRect(0, 0, getWidth()-1, getHeight()-1, cornerRadius, cornerRadius);
         g2.dispose();
     }
+
+    public Dimension getMaximumSize() {
+        Dimension pref = getPreferredSize();
+        return new Dimension(Integer.MAX_VALUE, pref.height);
+    }
 }
