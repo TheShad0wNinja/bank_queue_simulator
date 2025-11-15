@@ -1,29 +1,22 @@
 package com.bank.ui.pages;
 
+import com.bank.controllers.HistoryDetailPageController;
 import com.bank.models.SimulationHistoryRecord;
 import com.bank.ui.Theme;
 import com.bank.ui.components.*;
-import com.bank.utils.TextUtils;
-import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
-import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.general.DefaultPieDataset;
 
 import javax.swing.*;
-import javax.swing.plaf.ColorUIResource;
 import java.awt.*;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 public class HistoryDetailPage extends JPanel {
-    private final SimulationHistoryRecord record;
-    private JTabbedPane tabbedPane;
+    private JLabel subtitleLabel;
+    private JPanel generalConfigPanel;
+    private JPanel distributionsPanel;
+    private JPanel resultsPanel;
 
     public HistoryDetailPage(SimulationHistoryRecord record) {
-        this.record = record;
         setLayout(new BorderLayout());
         setBackground(Theme.BACKGROUND);
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -31,7 +24,7 @@ public class HistoryDetailPage extends JPanel {
         JPanel header = prepareHeaderPanel();
         add(header, BorderLayout.NORTH);
 
-        tabbedPane = new JTabbedPane();
+        JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.setBackground(Theme.PRIMARY_LIGHT);
         tabbedPane.setForeground(Theme.PRIMARY);
         tabbedPane.setFont(Theme.DEFAULT_FONT);
@@ -40,6 +33,8 @@ public class HistoryDetailPage extends JPanel {
         tabbedPane.addTab("Results", prepareResultsTab());
 
         add(tabbedPane, BorderLayout.CENTER);
+
+        new HistoryDetailPageController(this, record);
     }
 
     private JPanel prepareHeaderPanel() {
@@ -54,16 +49,19 @@ public class HistoryDetailPage extends JPanel {
 
         headerPanel.add(Box.createVerticalStrut(5));
 
-        String dateStr = record.getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        JLabel dateLabel = new JLabel("Run Date: " + dateStr);
-        dateLabel.setFont(Theme.DEFAULT_FONT);
-        dateLabel.setForeground(Theme.TEXT_SECONDARY);
-        dateLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
-        headerPanel.add(dateLabel);
+        subtitleLabel = new JLabel();
+        subtitleLabel.setFont(Theme.DEFAULT_FONT);
+        subtitleLabel.setForeground(Theme.TEXT_SECONDARY);
+        subtitleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        headerPanel.add(subtitleLabel);
 
         headerPanel.add(Box.createVerticalStrut(40));
 
         return headerPanel;
+    }
+
+    public void setSubtitleText(String text) {
+        subtitleLabel.setText(text);
     }
 
     private JScrollPane prepareConfigTab() {
@@ -95,24 +93,15 @@ public class HistoryDetailPage extends JPanel {
     }
 
     private JPanel prepareGeneralConfigPanel() {
-        ThemePanel panel = new ThemePanel();
-        panel.setLayout(new GridLayout(0, 2, 20, 10));
-        panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-        panel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        generalConfigPanel = new ThemePanel();
+        generalConfigPanel.setLayout(new GridLayout(0, 2, 20, 10));
+        generalConfigPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        generalConfigPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        return generalConfigPanel;
+    }
 
-        SimulationHistoryRecord.SimulationConfigSnapshot config = record.getConfigSnapshot();
-        SimulationHistoryRecord.SimulationParams params = record.getSimulationParams();
-
-        String[][] configs = {
-                {"Outdoor Queue Size", String.valueOf(config.getOutdoorQueueCapacity())},
-                {"Probability of Cash Customer", String.valueOf(config.getCashCustomerProbability())},
-                {"Number of Outdoor Tellers", String.valueOf(countEmployees(config.getEmployees(), "OUTDOOR", "CASH"))},
-                {"Number of Indoor Tellers", String.valueOf(countEmployees(config.getEmployees(), "INDOOR", "CASH"))},
-                {"Number of Indoor Service Employees", String.valueOf(countEmployees(config.getEmployees(), "INDOOR", "SERVICE"))},
-                {"Simulation Days", String.valueOf(params.getSimulationDays())},
-                {"Customers per Day", String.valueOf(params.getSimulationCustomers())},
-                {"Simulation Repetition", String.valueOf(params.getSimulationRepetition())}
-        };
+    public void setGeneralConfigPanelCells(String[][] configs) {
+        generalConfigPanel.removeAll();
 
         for (String[] configLabel : configs) {
             JPanel cell = new JPanel(new BorderLayout(5, 5));
@@ -128,16 +117,8 @@ public class HistoryDetailPage extends JPanel {
             field.setEditable(false);
             cell.add(field, BorderLayout.CENTER);
 
-            panel.add(cell);
+            generalConfigPanel.add(cell);
         }
-
-        return panel;
-    }
-
-    private int countEmployees(java.util.List<SimulationHistoryRecord.EmployeeConfigSnapshot> employees, String area, String type) {
-        return (int) employees.stream()
-                .filter(e -> e.getArea().equals(area) && e.getType().equals(type))
-                .count();
     }
 
     private JPanel prepareDistributionsPanel() {
@@ -146,44 +127,14 @@ public class HistoryDetailPage extends JPanel {
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
         panel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        JPanel distributionsPanel = new JPanel();
+        distributionsPanel = new JPanel();
         distributionsPanel.setLayout(new BoxLayout(distributionsPanel, BoxLayout.Y_AXIS));
         distributionsPanel.setBackground(Theme.PANEL_BG);
-
-        SimulationHistoryRecord.SimulationConfigSnapshot config = record.getConfigSnapshot();
-
-        ProbabilitiesTable timeBetweenArrivalsTable = new ProbabilitiesTable(config.getTimeBetweenArrivalProbabilities());
-        timeBetweenArrivalsTable.setEnabled(false);
-        addDistributionTable(distributionsPanel, "Time Between Arrivals", timeBetweenArrivalsTable);
-
-        Map<String, java.util.List<SimulationHistoryRecord.EmployeeConfigSnapshot>> grouped = new LinkedHashMap<>();
-        for (SimulationHistoryRecord.EmployeeConfigSnapshot emp : config.getEmployees()) {
-            String key = emp.getArea() + "_" + emp.getType();
-            grouped.computeIfAbsent(key, k -> new ArrayList<>()).add(emp);
-        }
-
-        for (var entry : grouped.entrySet()) {
-            for (int i = 0; i < entry.getValue().size(); i++) {
-                SimulationHistoryRecord.EmployeeConfigSnapshot emp = entry.getValue().get(i);
-                String label = TextUtils.capitalize(
-                        String.join(" ",
-                                Arrays.stream(entry.getKey().split("_"))
-                                        .map(str -> str.matches("-?\\d+(\\.\\d+)?")
-                                                ? String.valueOf(Integer.parseInt(str) + 1)
-                                                : str)
-                                        .toList())) + " " + (i + 1);
-
-                ProbabilitiesTable table = new ProbabilitiesTable(emp.getServiceTimeProbabilities());
-                table.setEnabled(false);
-                addDistributionTable(distributionsPanel, label, table);
-            }
-        }
-
         panel.add(distributionsPanel, BorderLayout.CENTER);
         return panel;
     }
 
-    private void addDistributionTable(JPanel parent, String title, ProbabilitiesTable table) {
+    public void addDistributionTable(String title, ProbabilitiesTable table) {
         JPanel wrapper = new JPanel();
         wrapper.setLayout(new BoxLayout(wrapper, BoxLayout.Y_AXIS));
         wrapper.setBackground(Theme.PANEL_BG);
@@ -203,50 +154,14 @@ public class HistoryDetailPage extends JPanel {
         wrapper.add(table);
 
         wrapper.setMaximumSize(new Dimension(Integer.MAX_VALUE, wrapper.getPreferredSize().height));
-        parent.add(wrapper);
+        distributionsPanel.add(wrapper);
     }
 
     private JScrollPane prepareResultsTab() {
-        JPanel resultsPanel = new JPanel();
+        resultsPanel = new JPanel();
         resultsPanel.setLayout(new BoxLayout(resultsPanel, BoxLayout.Y_AXIS));
         resultsPanel.setBackground(Theme.BACKGROUND);
         resultsPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
-
-        SimulationEventsTable eventsTable = new SimulationEventsTable();
-        for (SimulationHistoryRecord.EventRow event : record.getEvents()) {
-            eventsTable.addEventRow(
-                    event.time(),
-                    event.type(),
-                    event.customer(),
-                    event.service(),
-                    event.employee(),
-                    event.queues(),
-                    event.action()
-            );
-        }
-        eventsTable.setEnabled(false);
-        addDataTable(resultsPanel, "First Run's Simulation Events", eventsTable, 400);
-
-        SimulationStatisticsTable firstRunStatsTable = new SimulationStatisticsTable();
-        firstRunStatsTable.setStatistics(new ArrayList<>(record.getFirstRunStats()));
-        firstRunStatsTable.setEnabled(false);
-        addDataTable(resultsPanel, "First Run Statistics", firstRunStatsTable, 300);
-
-        SimulationStatisticsTable firstBatchStatsTable = new SimulationStatisticsTable();
-        firstBatchStatsTable.setStatistics(new ArrayList<>(record.getFirstBatchStats()));
-        firstBatchStatsTable.setEnabled(false);
-        addDataTable(resultsPanel, "First Batch Statistics", firstBatchStatsTable, 300);
-
-        SimulationStatisticsTable totalStatsTable = new SimulationStatisticsTable();
-        totalStatsTable.setStatistics(new ArrayList<>(record.getTotalStats()));
-        totalStatsTable.setEnabled(false);
-        addDataTable(resultsPanel, "Total Statistics", totalStatsTable, 300);
-
-        addChart(resultsPanel, "Average Service Times", createAvgServiceTimeChart());
-        addChart(resultsPanel, "Average Wait Times", createAvgWaitTimesChart());
-        addChart(resultsPanel, "Maximum Queue Sizes", createMaxQueueSizeChart());
-        addChart(resultsPanel, "Wait Probability Distribution", createWaitProbabilityPieChart());
-        addChart(resultsPanel, "Idle vs Busy Portion", createIdlePortionChart());
 
         JScrollPane scrollPane = new JScrollPane(resultsPanel);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -255,7 +170,7 @@ public class HistoryDetailPage extends JPanel {
         return scrollPane;
     }
 
-    private void addDataTable(JPanel parent, String title, JPanel tablePanel, int height) {
+    public void addDataTable(String title, JPanel tablePanel, int height) {
         ThemePanel panel = new ThemePanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -272,11 +187,11 @@ public class HistoryDetailPage extends JPanel {
         tablePanel.setAlignmentX(Component.LEFT_ALIGNMENT);
 
         panel.add(tablePanel);
-        parent.add(panel);
-        parent.add(Box.createVerticalStrut(30));
+        resultsPanel.add(panel);
+        resultsPanel.add(Box.createVerticalStrut(30));
     }
 
-    private void addChart(JPanel parent, String title, JFreeChart chart) {
+    public void addChart(String title, JFreeChart chart) {
         ThemePanel panel = new ThemePanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
@@ -285,7 +200,7 @@ public class HistoryDetailPage extends JPanel {
         label.setFont(Theme.TITLE_FONT);
         label.setAlignmentX(Component.LEFT_ALIGNMENT);
 
-        org.jfree.chart.ChartPanel chartPanel = new org.jfree.chart.ChartPanel(chart);
+        ChartPanel chartPanel = new ChartPanel(chart);
         chartPanel.setPreferredSize(new Dimension(900, 400));
         chartPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 400));
         chartPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -293,108 +208,8 @@ public class HistoryDetailPage extends JPanel {
         panel.add(label);
         panel.add(Box.createVerticalStrut(10));
         panel.add(chartPanel);
-        parent.add(panel);
-        parent.add(Box.createVerticalStrut(30));
-    }
-
-    private JFreeChart createAvgServiceTimeChart() {
-        DefaultCategoryDataset ds = new DefaultCategoryDataset();
-        for (var s : record.getTotalStats()) {
-            String key = s.label();
-            if (key.equals("Average Cash Customer Service Time") ||
-                    key.equals("Average Service Customer Service Time")) {
-                ds.addValue(parseStatValue(s.value()), "Avg Service Time", key);
-            }
-        }
-        return ChartFactory.createBarChart(
-                "Average Service Times",
-                "Customer Type",
-                "Avg Service Time",
-                ds
-        );
-    }
-
-    private JFreeChart createAvgWaitTimesChart() {
-        DefaultCategoryDataset ds = new DefaultCategoryDataset();
-        for (var s : record.getTotalStats()) {
-            String key = s.label();
-            if (key.equals("Average Indoor Teller Wait Time") ||
-                    key.equals("Average Outdoor Teller Wait Time") ||
-                    key.equals("Average Service Employee Wait Time") ||
-                    key.equals("Average Total Wait Time")) {
-                ds.addValue(parseStatValue(s.value()), "Avg Wait", key);
-            }
-        }
-        return ChartFactory.createBarChart(
-                "Average Wait Times",
-                "Queue Type",
-                "Avg Wait Time",
-                ds
-        );
-    }
-
-    private JFreeChart createMaxQueueSizeChart() {
-        DefaultCategoryDataset ds = new DefaultCategoryDataset();
-        for (var s : record.getTotalStats()) {
-            String key = s.label();
-            if (key.equals("Max Indoor Teller Queue Size") ||
-                    key.equals("Max Outdoor Teller Queue Size") ||
-                    key.equals("Max Service Employee Queue Size")) {
-                ds.addValue(parseStatValue(s.value()), "Max Queue Size", key);
-            }
-        }
-        return ChartFactory.createBarChart(
-                "Maximum Queue Sizes",
-                "Queue",
-                "Max Size",
-                ds
-        );
-    }
-
-    private JFreeChart createIdlePortionChart() {
-        DefaultCategoryDataset ds = new DefaultCategoryDataset();
-        for (var s : record.getTotalStats()) {
-            String key = s.label();
-            if (key.endsWith("Idle Portion")) {
-                double idle = parseStatValue(s.value());
-                double busy = 100.0 - idle;
-                ds.addValue(idle, "Idle %", key);
-                ds.addValue(busy, "Busy %", key);
-            }
-        }
-        return ChartFactory.createStackedBarChart(
-                "Idle vs Busy Time",
-                "Employee",
-                "Percentage",
-                ds
-        );
-    }
-
-    private JFreeChart createWaitProbabilityPieChart() {
-        DefaultPieDataset dataset = new DefaultPieDataset();
-        for (var s : record.getTotalStats()) {
-            if (s.label().toLowerCase().contains("wait probability")) {
-                double val = parseStatValue(s.value());
-                dataset.setValue(s.label(), val);
-            }
-        }
-        return ChartFactory.createPieChart(
-                "Wait Probability Distribution",
-                dataset,
-                true, true, false
-        );
-    }
-
-    private double parseStatValue(String value) {
-        if (value == null) return 0;
-        try {
-            if (value.endsWith("%")) {
-                return Double.parseDouble(value.replace("%", "").trim());
-            }
-            return Double.parseDouble(value.trim());
-        } catch (NumberFormatException e) {
-            return 0;
-        }
+        resultsPanel.add(panel);
+        resultsPanel.add(Box.createVerticalStrut(30));
     }
 }
 

@@ -53,6 +53,7 @@ public class SimulationStatisticsTable extends JPanel {
             }
         };
         table.setDefaultRenderer(Object.class, cellRenderer);
+        this.setEnabled(false);
 
         JTableHeader header = table.getTableHeader();
         header.setReorderingAllowed(false);

@@ -7,13 +7,11 @@ import com.bank.ui.components.SimulationEventsTable;
 import com.bank.ui.components.SimulationStatisticsTable;
 import com.bank.ui.pages.SimulationPage;
 import com.bank.utils.SimulationHistoryStorage;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.JFreeChart;
-import org.jfree.data.category.DefaultCategoryDataset;
-import org.jfree.data.general.DefaultPieDataset;
 
 import javax.swing.*;
 import java.util.*;
+
+import static com.bank.utils.SimulationVisualization.*;
 
 public class SimulationPageController {
     private final SimulationPage view;
@@ -21,7 +19,7 @@ public class SimulationPageController {
     private final SimulationHistoryStorage historyStorage = new SimulationHistoryStorage();
     private Map<String, JTextField> simulationParamFields;
     private final SimulationEventsTable simulationEventsTable = new SimulationEventsTable();
-    private final SimulationStatisticsTable firstDayStatsTable = new SimulationStatisticsTable();
+    private final SimulationStatisticsTable firstRunStatsTable = new SimulationStatisticsTable();
     private final SimulationStatisticsTable firstBatchStatsTable = new SimulationStatisticsTable();
     private final SimulationStatisticsTable totalStatsTable = new SimulationStatisticsTable();
 
@@ -52,20 +50,25 @@ public class SimulationPageController {
 
         simulator.startSimulation();
 
-        firstDayStatsTable.setStatistics(simulator.getFirstDayStats().getStatistics());
-        firstBatchStatsTable.setStatistics(simulator.getFirstBatchStats().getStatistics());
-        totalStatsTable.setStatistics(simulator.getTotalStats().getStatistics());
+        var firstRunStats = simulator.getFirstRunStats().getStatistics();
+        var firstBatchStats = simulator.getFirstBatchStats().getStatistics();
+        var totalStats = simulator.getTotalStats().getStatistics();
+
+        firstRunStatsTable.setStatistics(firstRunStats);
+        firstBatchStatsTable.setStatistics(firstBatchStats);
+        totalStatsTable.setStatistics(totalStats);
 
         view.addDataTable("First Run's Simulation Events", simulationEventsTable, 400);
-        view.addDataTable("First Run Statistics", firstDayStatsTable, 300);
+        view.addDataTable("First Run Statistics", firstRunStatsTable, 300);
         view.addDataTable("First Batch Statistics", firstBatchStatsTable, 300);
         view.addDataTable("Total Statistics", totalStatsTable, 300);
 
-        view.addChart("Average Service Times", createAvgServiceTimeChart());
-        view.addChart("Average Wait Times", createAvgWaitTimesChart());
-        view.addChart("Maximum Queue Sizes", createMaxQueueSizeChart());
-        view.addChart("Wait Probability Distribution", createWaitProbabilityPieChart());
-        view.addChart("Idle vs Busy Portion", createIdlePortionChart());
+
+        view.addChart("Average Service Times", createAvgServiceTimeChart(totalStats));
+        view.addChart("Average Wait Times", createAvgWaitTimesChart(totalStats));
+        view.addChart("Maximum Queue Sizes", createMaxQueueSizeChart(totalStats));
+        view.addChart("Wait Probability Distribution", createWaitProbabilityPieChart(totalStats));
+        view.addChart("Idle vs Busy Portion", createIdlePortionChart(totalStats));
 
         view.showResults();
         saveSimulationHistory();
@@ -133,7 +136,7 @@ public class SimulationPageController {
             SimulationHistoryRecord record = new SimulationHistoryRecord(
                     null,
                     events,
-                    new ArrayList<>(simulator.getFirstDayStats().getStatistics()),
+                    new ArrayList<>(simulator.getFirstRunStats().getStatistics()),
                     new ArrayList<>(simulator.getFirstBatchStats().getStatistics()),
                     new ArrayList<>(simulator.getTotalStats().getStatistics()),
                     configSnapshot,
@@ -143,128 +146,6 @@ public class SimulationPageController {
             historyStorage.saveSimulation(record);
         } catch (Exception e) {
             System.err.println("Failed to save simulation history: " + e.getMessage());
-        }
-    }
-
-    private JFreeChart createAvgServiceTimeChart() {
-        DefaultCategoryDataset ds = new DefaultCategoryDataset();
-
-        var stats = simulator.getTotalStats().getStatistics();
-        for (var s : stats) {
-            String key = s.label();
-
-            if (key.equals("Average Cash Customer Service Time") ||
-                    key.equals("Average Service Customer Service Time")) {
-                ds.addValue(parseStatValue(s.value()), "Avg Service Time", key);
-            }
-        }
-
-        return ChartFactory.createBarChart(
-                "Average Service Times",
-                "Customer Type",
-                "Avg Service Time",
-                ds
-        );
-    }
-
-    private JFreeChart createAvgWaitTimesChart() {
-        DefaultCategoryDataset ds = new DefaultCategoryDataset();
-
-        var stats = simulator.getTotalStats().getStatistics();
-        for (var s : stats) {
-            String key = s.label();
-
-            if (key.equals("Average Indoor Teller Wait Time") ||
-                    key.equals("Average Outdoor Teller Wait Time") ||
-                    key.equals("Average Service Employee Wait Time") ||
-                    key.equals("Average Total Wait Time")) {
-                ds.addValue(parseStatValue(s.value()), "Avg Wait", key);
-            }
-        }
-
-        return ChartFactory.createBarChart(
-                "Average Wait Times",
-                "Queue Type",
-                "Avg Wait Time",
-                ds
-        );
-    }
-
-    private JFreeChart createMaxQueueSizeChart() {
-        DefaultCategoryDataset ds = new DefaultCategoryDataset();
-
-        var stats = simulator.getTotalStats().getStatistics();
-        for (var s : stats) {
-            String key = s.label();
-
-            if (key.equals("Max Indoor Teller Queue Size") ||
-                    key.equals("Max Outdoor Teller Queue Size") ||
-                    key.equals("Max Service Employee Queue Size")) {
-                ds.addValue(parseStatValue(s.value()), "Max Queue Size", key);
-            }
-        }
-
-        return ChartFactory.createBarChart(
-                "Maximum Queue Sizes",
-                "Queue",
-                "Max Size",
-                ds
-        );
-    }
-
-    private JFreeChart createIdlePortionChart() {
-        DefaultCategoryDataset ds = new DefaultCategoryDataset();
-
-        var stats = simulator.getTotalStats().getStatistics();
-        for (var s : stats) {
-            String key = s.label();
-
-            if (key.endsWith("Idle Portion")) {
-                double idle = parseStatValue(s.value());
-                double busy = 100.0 - idle;
-
-                ds.addValue(idle, "Idle %", key);
-                ds.addValue(busy, "Busy %", key);
-            }
-        }
-
-        return ChartFactory.createStackedBarChart(
-                "Idle vs Busy Time",
-                "Employee",
-                "Percentage",
-                ds
-        );
-    }
-
-    private JFreeChart createWaitProbabilityPieChart() {
-        DefaultPieDataset dataset = new DefaultPieDataset();
-
-        var stats = simulator.getTotalStats().getStatistics();
-        for (var s : stats) {
-            if (s.label().toLowerCase().contains("wait probability")) {
-                double val = parseStatValue(s.value());
-                dataset.setValue(s.label(), val);
-            }
-        }
-
-        return ChartFactory.createPieChart(
-                "Wait Probability Distribution",
-                dataset,
-                true, true, false
-        );
-    }
-
-    private double parseStatValue(String value) {
-        if (value == null) return 0;
-
-        try {
-            if (value.endsWith("%")) {
-                return Double.parseDouble(value.replace("%", "").trim());
-            }
-
-            return Double.parseDouble(value.trim());
-        } catch (NumberFormatException e) {
-            return 0;
         }
     }
 

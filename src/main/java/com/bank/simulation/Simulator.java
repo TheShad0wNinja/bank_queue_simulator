@@ -30,7 +30,7 @@ public class Simulator {
     private List<Employee> indoorTellers;
     private List<Employee> serviceEmployees;
 
-    private SimulationStatistics firstDayStats;
+    private SimulationStatistics firstRunStats;
     private SimulationStatistics firstBatchStats;
     private SimulationStatistics totalStats;
 
@@ -49,7 +49,7 @@ public class Simulator {
         timeBetweenArrivalDistribution = configs.getTimeBetweenArrivalDistribution();
 
         totalStats = new SimulationStatistics();
-        firstDayStats = null;
+        firstRunStats = null;
         firstBatchStats = null;
 
         for (int batch = 0; batch < simulationRetries; batch++) {
@@ -58,7 +58,7 @@ public class Simulator {
                     shouldDispatchEvent = true;
                     runSingleSimulation();
                     shouldDispatchEvent = false;
-                    firstDayStats = currentStats;
+                    firstRunStats = currentStats;
                 } else {
                     runSingleSimulation();
                 }
@@ -69,8 +69,8 @@ public class Simulator {
             }
         }
 
-        if (firstDayStats != null) {
-            firstDayStats.calculateStatistics();
+        if (firstRunStats != null) {
+            firstRunStats.calculateStatistics();
         }
         if (firstBatchStats != null) {
             firstBatchStats.calculateStatistics();
@@ -287,7 +287,7 @@ public class Simulator {
         return firstBatchStats;
     }
 
-    public SimulationStatistics getFirstDayStats() {
-        return firstDayStats;
+    public SimulationStatistics getFirstRunStats() {
+        return firstRunStats;
     }
 }

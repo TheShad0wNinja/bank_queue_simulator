@@ -40,6 +40,7 @@ public class SimulationEventsTable extends JPanel {
         table.setGridColor(Theme.BORDER);
         table.setShowGrid(true);
         table.setIntercellSpacing(new Dimension(1, 0));
+        table.setEnabled(false);
 
         DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
             @Override
@@ -95,9 +96,6 @@ public class SimulationEventsTable extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
     }
 
-    /**
-     * Append a simulation event as a new table row.
-     */
     public void addEventRow(
             int time,
             String type,
