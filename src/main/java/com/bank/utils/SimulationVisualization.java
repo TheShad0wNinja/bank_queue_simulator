@@ -22,7 +22,7 @@ public class SimulationVisualization {
     }
 
     public static JFreeChart createWaitProbabilityPieChart(List<Statistic> stats) {
-        DefaultPieDataset dataset = new DefaultPieDataset();
+        DefaultPieDataset<String> dataset = new DefaultPieDataset<>();
 
         for (var s : stats) {
             if (s.label().toLowerCase().contains("wait probability")) {
