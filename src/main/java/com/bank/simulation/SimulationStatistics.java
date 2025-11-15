@@ -1,9 +1,12 @@
 package com.bank.simulation;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 public class SimulationStatistics {
-    public record Statistic(String label, String value) {}
+    public record Statistic(String label, String value) implements Serializable {
+        private static final long serialVersionUID = 1L;
+    }
 
     private int totalCashServiceTime = 0;
     private int totalServiceServiceTime = 0;

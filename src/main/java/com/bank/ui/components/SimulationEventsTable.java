@@ -27,7 +27,6 @@ public class SimulationEventsTable extends JPanel {
                 "Action"
         };
 
-        // READ ONLY MODEL
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) { return false; }
@@ -35,7 +34,6 @@ public class SimulationEventsTable extends JPanel {
 
         table = new JTable(tableModel);
 
-        // Table Appearance
         table.setFont(Theme.DEFAULT_FONT.deriveFont(13f));
         table.setRowHeight(32);
         table.setForeground(Theme.TEXT_PRIMARY);
@@ -43,7 +41,6 @@ public class SimulationEventsTable extends JPanel {
         table.setShowGrid(true);
         table.setIntercellSpacing(new Dimension(1, 0));
 
-        // Alternating row colors
         DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(
@@ -66,7 +63,6 @@ public class SimulationEventsTable extends JPanel {
         };
         table.setDefaultRenderer(Object.class, cellRenderer);
 
-        // Header style
         JTableHeader header = table.getTableHeader();
         header.setReorderingAllowed(false);
         header.setFont(Theme.DEFAULT_FONT.deriveFont(Font.BOLD, 12f));
@@ -121,15 +117,28 @@ public class SimulationEventsTable extends JPanel {
                 action
         });
 
-        // Auto-scroll to bottom
         JScrollBar bar = ((JScrollPane) getComponent(0)).getVerticalScrollBar();
         bar.setValue(bar.getMaximum());
     }
 
-    /**
-     * Clear all events (useful when starting a new simulation)
-     */
     public void clearEvents() {
         tableModel.setRowCount(0);
+    }
+
+    public Object[][] getTableData() {
+        int rowCount = tableModel.getRowCount();
+        int colCount = tableModel.getColumnCount();
+        Object[][] data = new Object[rowCount][colCount];
+
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < colCount; j++) {
+                data[i][j] = tableModel.getValueAt(i, j);
+            }
+        }
+        return data;
+    }
+
+    public void setEnabled(boolean enabled) {
+        table.setEnabled(enabled);
     }
 }

@@ -96,4 +96,21 @@ public class SimulationStatisticsTable extends JPanel {
     public void clearStatistics() {
         tableModel.setRowCount(0);
     }
+
+    public Object[][] getTableData() {
+        int rowCount = tableModel.getRowCount();
+        int colCount = tableModel.getColumnCount();
+        Object[][] data = new Object[rowCount][colCount];
+
+        for (int i = 0; i < rowCount; i++) {
+            for (int j = 0; j < colCount; j++) {
+                data[i][j] = tableModel.getValueAt(i, j);
+            }
+        }
+        return data;
+    }
+
+    public void setEnabled(boolean enabled) {
+        table.setEnabled(enabled);
+    }
 }

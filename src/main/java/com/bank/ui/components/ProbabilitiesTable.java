@@ -11,7 +11,8 @@ import java.util.Map;
 
 public class ProbabilitiesTable extends JPanel {
     private final JTable table;
-    private final DefaultTableModel tableModel;
+    private DefaultTableModel tableModel;
+    private JPanel buttonPanel;
 
     public ProbabilitiesTable(Map<Integer, Double> probabilities) {
         this();
@@ -25,26 +26,23 @@ public class ProbabilitiesTable extends JPanel {
     public ProbabilitiesTable() {
         setLayout(new BorderLayout(0, 10));
         setBackground(Theme.PANEL_BG);
-//        setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
 
         setPreferredSize(new Dimension(100, 250));
         setMinimumSize(new Dimension(100, 250));
 
         String[] columnNames = {"Value", "Probability", "Cumulative Probability"};
 
-        // FIX: Make the table model editable with validation
         tableModel = new DefaultTableModel(columnNames, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column != 2; // Only Value and Probability are editable, not Cumulative
+                return column != 2;
             }
 
             @Override
             public void setValueAt(Object aValue, int row, int column) {
-                if (column == 1) { // Probability column
+                if (column == 1) {
                     try {
                         double value = Double.parseDouble(aValue.toString());
-                        // Clamp between 0 and 1
                         if (value > 1.0) value = 1.0;
                         if (value < 0.0) value = 0.0;
                         super.setValueAt(value, row, column);
@@ -70,22 +68,22 @@ public class ProbabilitiesTable extends JPanel {
 
         table = new JTable(tableModel);
 
-        // --- Style the Table ---
+
         table.setRowHeight(40);
         table.setFont(Theme.DEFAULT_FONT.deriveFont(14f));
         table.setForeground(Theme.TEXT_PRIMARY);
         table.setGridColor(Theme.BORDER);
-        table.setIntercellSpacing(new Dimension(1, 0)); // Add horizontal spacing
-        table.setShowGrid(true); // Show grid lines
-        table.setShowVerticalLines(true); // Show vertical lines between columns
-        table.setShowHorizontalLines(false); // Hide horizontal lines
+        table.setIntercellSpacing(new Dimension(1, 0));
+        table.setShowGrid(true);
+        table.setShowVerticalLines(true);
+        table.setShowHorizontalLines(false);
         table.setFillsViewportHeight(true);
 
-        // Custom selection colors
+
         table.setSelectionBackground(Theme.PRIMARY_LIGHT);
         table.setSelectionForeground(Theme.PRIMARY);
 
-        // Custom cell renderer for alternating row colors and padding
+
         DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -95,7 +93,7 @@ public class ProbabilitiesTable extends JPanel {
                     setForeground(table.getSelectionForeground());
                 } else {
                     setBackground(row % 2 == 0 ? Theme.PANEL_BG : Theme.BACKGROUND);
-                    // Make cumulative probability column look read-only
+
                     if (column == 2) {
                         setForeground(Theme.TEXT_SECONDARY);
                     } else {
@@ -108,7 +106,7 @@ public class ProbabilitiesTable extends JPanel {
         };
         table.setDefaultRenderer(Object.class, cellRenderer);
 
-        // --- Style the Header ---
+
         JTableHeader header = table.getTableHeader();
         header.setReorderingAllowed(false);
         header.setResizingAllowed(false);
@@ -117,7 +115,7 @@ public class ProbabilitiesTable extends JPanel {
         header.setBackground(Theme.BACKGROUND);
         header.setOpaque(false);
 
-        // Custom header renderer for padding and border
+
         DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -139,8 +137,7 @@ public class ProbabilitiesTable extends JPanel {
 
         add(scrollPane, BorderLayout.CENTER);
 
-        // --- Buttons ---
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+        buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
         buttonPanel.setBackground(Theme.BACKGROUND);
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 0, 0));
 
@@ -172,7 +169,6 @@ public class ProbabilitiesTable extends JPanel {
         }
     }
 
-    // Update cumulative probabilities whenever probabilities change
     private void updateCumulativeProbabilities() {
         double cumulative = 0.0;
         for (int i = 0; i < tableModel.getRowCount(); i++) {
@@ -188,7 +184,6 @@ public class ProbabilitiesTable extends JPanel {
         }
     }
 
-    // Helper method to get all table data
     public Object[][] getTableData() {
         int rowCount = tableModel.getRowCount();
         int colCount = tableModel.getColumnCount();
@@ -200,5 +195,35 @@ public class ProbabilitiesTable extends JPanel {
             }
         }
         return data;
+    }
+
+    public void setEnabled(boolean enabled) {
+        table.setEnabled(enabled);
+        if (buttonPanel != null) {
+            buttonPanel.setVisible(enabled);
+        }
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        String[] columnNames = new String[model.getColumnCount()];
+        for (int i = 0; i < model.getColumnCount(); i++) {
+            columnNames[i] = model.getColumnName(i);
+        }
+        DefaultTableModel newModel = new DefaultTableModel(columnNames, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return enabled && column != 2;
+            }
+        };
+        for (int i = 0; i < model.getRowCount(); i++) {
+            Object[] rowData = new Object[model.getColumnCount()];
+            for (int j = 0; j < model.getColumnCount(); j++) {
+                rowData[j] = model.getValueAt(i, j);
+            }
+            newModel.addRow(rowData);
+        }
+        table.setModel(newModel);
+        this.tableModel = newModel;
+        if (enabled) {
+            updateCumulativeProbabilities();
+        }
     }
 }
