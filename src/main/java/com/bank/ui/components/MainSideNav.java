@@ -27,20 +27,43 @@ public class MainSideNav extends ThemePanel {
     }
 
     public MainSideNav(String[] pages, String defaultPage) {
+        IconFontSwing.register(GoogleMaterialDesignIcons.getIconFont());
 
         setLayout(new BorderLayout());
         setBackground(Theme.PANEL_BG);
-        setPreferredSize(new Dimension(250, 0));
 
         JPanel content = new JPanel();
         content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
         content.setBackground(Theme.PANEL_BG);
         content.setBorder(BorderFactory.createEmptyBorder(20, 16, 20, 16));
 
-        JLabel logo = new JLabel("Bank Queue Sim");
-        logo.setFont(Theme.TITLE_FONT);
-        logo.setAlignmentX(Component.LEFT_ALIGNMENT);
-        content.add(logo);
+        JPanel logoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        logoPanel.setBackground(Theme.PANEL_BG);
+        logoPanel.setAlignmentX(Component.LEFT_ALIGNMENT);
+        logoPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 50));
+
+        Icon logoIcon = IconFontSwing.buildIcon(GoogleMaterialDesignIcons.ACCOUNT_BALANCE, 42, Theme.PRIMARY);
+        JLabel logoIconLabel = new JLabel(logoIcon);
+
+        JPanel logoTextPanel = new JPanel();
+        logoTextPanel.setLayout(new BoxLayout(logoTextPanel, BoxLayout.Y_AXIS));
+        logoTextPanel.setBackground(Theme.PANEL_BG);
+
+        JLabel logoTitleTop = new JLabel("Bank Queue");
+        logoTitleTop.setFont(Theme.TITLE_FONT);
+        logoTitleTop.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        JLabel logoTitleBottom = new JLabel("Simulator");
+        logoTitleBottom.setFont(Theme.TITLE_FONT);
+        logoTitleBottom.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        logoTextPanel.add(logoTitleTop);
+        logoTextPanel.add(logoTitleBottom);
+
+        logoPanel.add(logoIconLabel);
+        logoPanel.add(logoTextPanel);
+
+        content.add(logoPanel);
         content.add(Box.createVerticalStrut(40));
 
         for (String page : pages) {
@@ -50,10 +73,6 @@ public class MainSideNav extends ThemePanel {
                 currentPage = btn;
                 currentPage.toggle();
             }
-
-            btn.setAlignmentX(Component.LEFT_ALIGNMENT);
-            btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
-            btn.setPreferredSize(new Dimension(218, 44));
 
             content.add(btn);
             content.add(Box.createVerticalStrut(8));
@@ -75,6 +94,9 @@ public class MainSideNav extends ThemePanel {
 
         btn.setHorizontalAlignment(SwingConstants.LEFT);
         btn.setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
+        btn.setAlignmentX(Component.LEFT_ALIGNMENT);
+        btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
+        btn.setMinimumSize(new Dimension(180, 44));
 
         btn.addActionListener(e -> {
             if (btn.equals(currentPage)) {
@@ -94,4 +116,5 @@ public class MainSideNav extends ThemePanel {
         });
 
         return btn;
-    }}
+    }
+}
