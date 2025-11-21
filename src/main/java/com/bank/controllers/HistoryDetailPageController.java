@@ -36,9 +36,9 @@ public class HistoryDetailPageController {
                 {"Number of Outdoor Tellers", String.valueOf(countEmployees(config.getEmployees(), "OUTDOOR", "CASH"))},
                 {"Number of Indoor Tellers", String.valueOf(countEmployees(config.getEmployees(), "INDOOR", "CASH"))},
                 {"Number of Indoor Service Employees", String.valueOf(countEmployees(config.getEmployees(), "INDOOR", "SERVICE"))},
-                {"Simulation Days", String.valueOf(params.getSimulationDays())},
-                {"Customers per Day", String.valueOf(params.getSimulationCustomers())},
-                {"Simulation Repetition", String.valueOf(params.getSimulationRepetition())}
+                {"Simulation Days", String.valueOf(params.simulationDays())},
+                {"Customers per Day", String.valueOf(params.simulationCustomers())},
+                {"Simulation Runs", String.valueOf(params.simulationRuns())}
         };
         view.setGeneralConfigPanelCells(configs);
 

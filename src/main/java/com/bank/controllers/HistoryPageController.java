@@ -10,13 +10,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 public class HistoryPageController {
+    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     private final HistoryPage view;
     private final SimulationHistoryStorage historyStorage;
 
     public HistoryPageController(HistoryPage view) {
         this.view = view;
         this.historyStorage = new SimulationHistoryStorage();
-        loadHistory();
     }
 
     public void loadHistory() {
@@ -29,8 +30,14 @@ public class HistoryPageController {
         }
 
         for (SimulationHistoryRecord record : history) {
-            String dateStr = record.getTimestamp().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-            String label = String.format("Simulation Run - %s", dateStr);
+            SimulationHistoryRecord.SimulationParams params = record.getSimulationParams();
+            String label = String.format(
+                    "Simulation - %s | Days: %d | Customers/day: %d | Runs: %d",
+                    record.getTimestamp().format(DATE_FORMAT),
+                    params.simulationDays(),
+                    params.simulationCustomers(),
+                    params.simulationRuns()
+            );
             view.addHistoryItem(label, record);
         }
     }
@@ -46,7 +53,6 @@ public class HistoryPageController {
     }
 
     public void deleteHistory(SimulationHistoryRecord record) {
-        //TODO: fix deletion not working
         int confirm = JOptionPane.showConfirmDialog(
                 view,
                 "Are you sure you want to delete this simulation record?",

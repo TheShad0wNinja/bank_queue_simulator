@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 public class SimulationHistoryStorage {
     private static final String HISTORY_DIR = "simulation_history";
@@ -69,7 +70,7 @@ public class SimulationHistoryStorage {
 
     public void deleteSimulation(SimulationHistoryRecord record) {
         List<SimulationHistoryRecord> history = loadHistory();
-        history.remove(record);
+        history.removeIf(existing -> Objects.equals(existing.getId(), record.getId()));
         saveHistory(history);
     }
 }

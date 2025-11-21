@@ -17,7 +17,7 @@ public class SimulationPageController {
     private final SimulationPage view;
     private final Simulator simulator;
     private final SimulationHistoryStorage historyStorage = new SimulationHistoryStorage();
-    private Map<String, JTextField> simulationParamFields;
+    private Map<String, JTextField> simulationParameters;
     private final SimulationEventsTable simulationEventsTable = new SimulationEventsTable();
     private final SimulationStatisticsTable firstRunStatsTable = new SimulationStatisticsTable();
     private final SimulationStatisticsTable firstBatchStatsTable = new SimulationStatisticsTable();
@@ -33,20 +33,29 @@ public class SimulationPageController {
     }
 
     private void loadParams() {
-        simulationParamFields = view.addSimulationParameter(new LinkedHashMap<>(){{
-            put("simulation_days", "Simulation Days");
-            put("simulation_customers", "Customers per Day");
-            put("simulation_repetition", "Simulation Repetition");
-        }});
+        simulationParameters = view.addParameters(new String[][]{
+                {"simulation_days", "Simulation Days", "10"},
+                {"simulation_customers", "Customers per Day", "10"},
+                {"simulation_runs", "Simulation Runs", "10"}
+        });
     }
 
     private void startSimulation() {
         view.clearSimulationResults();
         simulationEventsTable.clearEvents();
 
-        simulator.setSimulationCustomersCount(Integer.parseInt(simulationParamFields.get("simulation_customers").getText()));
-        simulator.setSimulationDays(Integer.parseInt(simulationParamFields.get("simulation_days").getText()));
-        simulator.setSimulationRetries(Integer.parseInt(simulationParamFields.get("simulation_repetition").getText()));
+        try {
+            int customersPerDay = getIntValue("simulation_customers");
+            int days = getIntValue("simulation_days");
+            int runs = getIntValue("simulation_runs");
+
+            simulator.setSimulationCustomersCount(customersPerDay);
+            simulator.setSimulationDays(days);
+            simulator.setSimulationRetries(runs);
+        } catch (NumberFormatException e) {
+            showErrorMessage("Please enter valid whole numbers for all simulation parameters.");
+            return;
+        }
 
         simulator.startSimulation();
 
@@ -128,9 +137,9 @@ public class SimulationPageController {
 
             SimulationHistoryRecord.SimulationParams params =
                     new SimulationHistoryRecord.SimulationParams(
-                            Integer.parseInt(simulationParamFields.get("simulation_days").getText()),
-                            Integer.parseInt(simulationParamFields.get("simulation_customers").getText()),
-                            Integer.parseInt(simulationParamFields.get("simulation_repetition").getText())
+                            getIntValue("simulation_days"),
+                            getIntValue("simulation_customers"),
+                            getIntValue("simulation_runs")
                     );
 
             SimulationHistoryRecord record = new SimulationHistoryRecord(
@@ -155,5 +164,17 @@ public class SimulationPageController {
 
     public void showSuccessMessage(String message) {
         JOptionPane.showMessageDialog(view, message, "Success", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private int getIntValue(String key) {
+        JTextField field = simulationParameters.get(key);
+        if (field == null) {
+            throw new NumberFormatException("Missing parameter for key " + key);
+        }
+        return Integer.parseInt(field.getText().trim());
+    }
+
+    private void showErrorMessage(String message) {
+        JOptionPane.showMessageDialog(view, message, "Invalid Parameters", JOptionPane.ERROR_MESSAGE);
     }
 }

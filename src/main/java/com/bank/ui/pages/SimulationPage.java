@@ -124,24 +124,26 @@ public class SimulationPage extends JPanel {
 
     public void clearSimulationResults() {
         simulationResultsPanel.removeAll();
+        simulationResultsPanel.revalidate();
+        simulationResultsPanel.repaint();
     }
 
-    public Map<String, JTextField> addSimulationParameter(Map<String, String> parameters) {
+    public Map<String, JTextField> addParameters(String[][] parameters) {
         simulationParamsPanel.removeAll();
         Map<String, JTextField> map = new HashMap<>();
 
-        for (var entry : parameters.entrySet()) {
+        for (String[] entry : parameters) {
             JPanel panel = new JPanel(new BorderLayout(5, 5));
             panel.setBackground(Theme.PANEL_BG);
 
-            JLabel label = new JLabel(entry.getValue());
+            JLabel label = new JLabel(entry[1]);
             label.setFont(Theme.DEFAULT_FONT);
             label.setForeground(Theme.TEXT_PRIMARY);
             panel.add(label, BorderLayout.NORTH);
 
-            ThemeTextField textField = new ThemeTextField(25);
-            textField.setText("10");
-            map.put(entry.getKey(), textField);
+            ThemeTextField textField = new ThemeTextField(10);
+            textField.setText(entry[2]);
+            map.put(entry[0], textField);
             panel.add(textField, BorderLayout.CENTER);
 
             simulationParamsPanel.add(panel);
@@ -149,6 +151,7 @@ public class SimulationPage extends JPanel {
 
         simulationParamsPanel.revalidate();
         simulationParamsPanel.repaint();
+
         return map;
     }
 

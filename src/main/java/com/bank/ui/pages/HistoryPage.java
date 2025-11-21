@@ -45,6 +45,7 @@ public class HistoryPage extends JPanel {
         add(historyListPanel, BorderLayout.CENTER);
 
         controller = new HistoryPageController(this);
+        controller.loadHistory();
     }
 
     public void refresh() {
