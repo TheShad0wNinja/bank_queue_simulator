@@ -3,124 +3,40 @@ package com.bank.simulation;
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class SimulationStatistics {
+public class SimulationData {
     public record Statistic(String label, String value) implements Serializable {
         private static final long serialVersionUID = 1L;
     }
 
-    private int totalCashServiceTime = 0;
-    private int totalServiceServiceTime = 0;
+    public int totalCashServiceTime = 0;
+    public int totalServiceServiceTime = 0;
 
-    private int totalIndoorTellerWaitTime = 0;
-    private int totalOutdoorTellerWaitTime = 0;
-    private int totalServiceEmployeeWaitTime = 0;
+    public int totalIndoorTellerWaitTime = 0;
+    public int totalOutdoorTellerWaitTime = 0;
+    public int totalServiceWaitTime = 0;
 
-    private int maxIndoorTellerQueueSize = 0;
-    private int maxOutdoorTellerQueueSize = 0;
-    private int maxServiceEmployeeQueueSize = 0;
+    public int maxIndoorTellerQueueSize = 0;
+    public int maxOutdoorTellerQueueSize = 0;
+    public int maxServiceEmployeeQueueSize = 0;
 
-    private int totalIndoorTellerWaitingCustomers = 0;
-    private int totalOutdoorTellerWaitingCustomers = 0;
-    private int totalServiceEmployeeWaitingCustomers = 0;
+    public  int totalIndoorTellerWaitingCustomers = 0;
+    public int totalOutdoorTellerWaitingCustomers = 0;
+    public int totalServiceEmployeeWaitingCustomers = 0;
 
-    private int totalIndoorTellerCustomers = 0;
-    private int totalOutdoorTellerCustomers = 0;
-    private int totalServiceEmployeeCustomers = 0;
+    public int totalIndoorTellerCustomers = 0;
+    public int totalOutdoorTellerCustomers = 0;
+    public int totalServiceEmployeeCustomers = 0;
 
-    private int totalTime = 0;
-    private int totalIndoorTellerIdleTime = 0;
-    private int totalOutdoorTellerIdleTime = 0;
-    private int totalServiceEmployeeIdleTime = 0;
+    public int totalTime = 0;
+    public int totalIndoorTellerIdleTime = 0;
+    public int totalOutdoorTellerIdleTime = 0;
+    public int totalServiceEmployeeIdleTime = 0;
 
-    private int indoorTellersCount = 1;
-    private int outdoorTellersCount = 1;
-    private int serviceEmployeesCount = 1;
+    public int indoorTellersCount = 1;
+    public int outdoorTellersCount = 1;
+    public int serviceEmployeesCount = 1;
 
-    private ArrayList<Statistic> statistics;
-
-    public void setServiceEmployeesCount(int serviceEmployeesCount) {
-        this.serviceEmployeesCount = serviceEmployeesCount;
-    }
-
-    public void setOutdoorTellersCount(int outdoorTellersCount) {
-        this.outdoorTellersCount = outdoorTellersCount;
-    }
-
-    public void setIndoorTellersCount(int indoorTellersCount) {
-        this.indoorTellersCount = indoorTellersCount;
-    }
-
-    public void addTotalCashServiceTime(int time) {
-        totalCashServiceTime += time;
-    }
-
-    public void addTotalServiceServiceTime(int time) {
-        totalServiceServiceTime += time;
-    }
-
-    public void addTotalIndoorTellerWaitTime(int time) {
-        totalIndoorTellerWaitTime += time;
-    }
-
-    public void addTotalOutdoorTellerWaitTime(int time) {
-        totalOutdoorTellerWaitTime += time;
-    }
-
-    public void addTotalServiceEmployeeWaitTime(int time) {
-        totalServiceEmployeeWaitTime += time;
-    }
-
-    public void updateIndoorTellerMaxQueueSize(int size) {
-        maxIndoorTellerQueueSize = Math.max(maxIndoorTellerQueueSize, size);
-    }
-
-    public void updateOutdoorTellerMaxQueueSize(int size) {
-        maxOutdoorTellerQueueSize = Math.max(maxOutdoorTellerQueueSize, size);
-    }
-
-    public void updateServiceEmployeeMaxQueueSize(int size) {
-        maxServiceEmployeeQueueSize = Math.max(maxServiceEmployeeQueueSize, size);
-    }
-
-    public void addIndoorTellerCustomer() {
-        totalIndoorTellerCustomers += 1;
-    }
-
-    public void addOutdoorTellerCustomer() {
-        totalOutdoorTellerCustomers += 1;
-    }
-
-    public void addServiceEmployeeCustomer() {
-        totalServiceEmployeeCustomers += 1;
-    }
-
-    public void addIndoorTellerWaitingCustomer() {
-        totalIndoorTellerWaitingCustomers += 1;
-    }
-
-    public void addOutdoorTellerWaitingCustomer() {
-        totalOutdoorTellerWaitingCustomers += 1;
-    }
-
-    public void addServiceEmployeeWaitingCustomer() {
-        totalServiceEmployeeWaitingCustomers += 1;
-    }
-
-    public void setTotalIndoorTellerIdleTime(int time) {
-        totalIndoorTellerIdleTime = time;
-    }
-
-    public void setTotalServiceEmployeeIdleTime(int time) {
-        this.totalServiceEmployeeIdleTime = time;
-    }
-
-    public void setTotalOutdoorTellerIdleTime(int time) {
-        this.totalOutdoorTellerIdleTime = time;
-    }
-
-    public void setTotalTime(int totalTime) {
-        this.totalTime = totalTime;
-    }
+    public ArrayList<Statistic> statistics;
 
     public void calculateStatistics() {
         statistics = new ArrayList<>();
@@ -130,8 +46,8 @@ public class SimulationStatistics {
         double avgCashCustomerServiceTime = totalCashCustomers == 0 ? 0 : totalCashServiceTime / (double) totalCashCustomers;
         double avgServiceCustomerServiceTime = totalServiceEmployeeCustomers == 0 ? 0 : totalServiceServiceTime / (double) totalServiceEmployeeCustomers;
 
-        statistics.add(new Statistic("Average Cash Customer Service Time", String.format("%.3f", avgCashCustomerServiceTime)));
-        statistics.add(new Statistic("Average Service Customer Service Time", String.format("%.3f", avgServiceCustomerServiceTime)));
+        statistics.add(new Statistic("Average Cash Customer Service Time", String.format("%.4f", avgCashCustomerServiceTime)));
+        statistics.add(new Statistic("Average Service Customer Service Time", String.format("%.4f", avgServiceCustomerServiceTime)));
 
         // Stat 2
         double avgIndoorTellerWait = totalIndoorTellerWaitingCustomers == 0 ? 0 :
@@ -139,16 +55,16 @@ public class SimulationStatistics {
         double avgOutdoorTellerWait = totalOutdoorTellerWaitingCustomers == 0 ? 0 :
                 totalOutdoorTellerWaitTime / (double) totalOutdoorTellerWaitingCustomers;
         double avgServiceEmployeeWait = totalServiceEmployeeWaitingCustomers == 0 ? 0 :
-                totalServiceEmployeeWaitTime / (double) totalServiceEmployeeWaitingCustomers;
+                totalServiceWaitTime / (double) totalServiceEmployeeWaitingCustomers;
 
         double totalWaitingCustomers = totalIndoorTellerWaitingCustomers + totalOutdoorTellerWaitingCustomers + totalServiceEmployeeWaitingCustomers;
-        double totalWaitTime = totalIndoorTellerWaitTime + totalOutdoorTellerWaitTime + totalServiceEmployeeWaitTime;
+        double totalWaitTime = totalIndoorTellerWaitTime + totalOutdoorTellerWaitTime + totalServiceWaitTime;
         double avgTotalWaitTime = totalWaitingCustomers == 0 ? 0 : totalWaitTime / totalWaitingCustomers;
 
-        statistics.add(new Statistic("Average Indoor Teller Wait Time", String.format("%.3f", avgIndoorTellerWait)));
-        statistics.add(new Statistic("Average Outdoor Teller Wait Time", String.format("%.3f", avgOutdoorTellerWait)));
-        statistics.add(new Statistic("Average Service Employee Wait Time", String.format("%.3f", avgServiceEmployeeWait)));
-        statistics.add(new Statistic("Average Total Wait Time", String.format("%.3f", avgTotalWaitTime)));
+        statistics.add(new Statistic("Average Indoor Teller Wait Time", String.format("%.4f", avgIndoorTellerWait)));
+        statistics.add(new Statistic("Average Outdoor Teller Wait Time", String.format("%.4f", avgOutdoorTellerWait)));
+        statistics.add(new Statistic("Average Service Employee Wait Time", String.format("%.4f", avgServiceEmployeeWait)));
+        statistics.add(new Statistic("Average Total Wait Time", String.format("%.4f", avgTotalWaitTime)));
 
         // Stat 3
         statistics.add(new Statistic("Max Indoor Teller Queue Size", String.valueOf(maxIndoorTellerQueueSize)));
@@ -165,27 +81,27 @@ public class SimulationStatistics {
         double probServiceWait = totalServiceEmployeeCustomers == 0 ? 0 :
                 totalServiceEmployeeWaitingCustomers / (double) totalServiceEmployeeCustomers;
 
-        statistics.add(new Statistic("Indoor Teller Wait Probability", String.format("%.1f%%", probIndoorWait * 100)));
-        statistics.add(new Statistic("Outdoor Teller Wait Probability", String.format("%.1f%%", probOutdoorWait * 100)));
-        statistics.add(new Statistic("Service Employee Wait Probability", String.format("%.1f%%", probServiceWait * 100)));
+        statistics.add(new Statistic("Indoor Teller Wait Probability", String.format("%.2f%%", probIndoorWait * 100)));
+        statistics.add(new Statistic("Outdoor Teller Wait Probability", String.format("%.2f%%", probOutdoorWait * 100)));
+        statistics.add(new Statistic("Service Employee Wait Probability", String.format("%.2f%%", probServiceWait * 100)));
 
         // State 5
         double indoorIdlePortion = totalTime == 0 ? 0 : totalIndoorTellerIdleTime / (double) (totalTime * indoorTellersCount);
         double outdoorIdlePortion = totalTime == 0 ? 0 : totalOutdoorTellerIdleTime / (double) (totalTime * outdoorTellersCount);
         double serviceIdlePortion = totalTime == 0 ? 0 : totalServiceEmployeeIdleTime / (double) (totalTime * serviceEmployeesCount) ;
 
-        statistics.add(new Statistic("Indoor Tellers Idle Portion", String.format("%.1f%%", indoorIdlePortion * 100)));
-        statistics.add(new Statistic("Outdoor Tellers Idle Portion", String.format("%.1f%%", outdoorIdlePortion * 100)));
-        statistics.add(new Statistic("Service Employees Idle Portion", String.format("%.1f%%", serviceIdlePortion * 100)));
+        statistics.add(new Statistic("Indoor Tellers Idle Portion", String.format("%.2f%%", indoorIdlePortion * 100)));
+        statistics.add(new Statistic("Outdoor Tellers Idle Portion", String.format("%.2f%%", outdoorIdlePortion * 100)));
+        statistics.add(new Statistic("Service Employees Idle Portion", String.format("%.2f%%", serviceIdlePortion * 100)));
     }
 
-    public void merge(SimulationStatistics stats) {
+    public void merge(SimulationData stats) {
         this.totalCashServiceTime += stats.totalCashServiceTime;
         this.totalServiceServiceTime += stats.totalServiceServiceTime;
 
         this.totalIndoorTellerWaitTime += stats.totalIndoorTellerWaitTime;
         this.totalOutdoorTellerWaitTime += stats.totalOutdoorTellerWaitTime;
-        this.totalServiceEmployeeWaitTime += stats.totalServiceEmployeeWaitTime;
+        this.totalServiceWaitTime += stats.totalServiceWaitTime;
 
         this.maxIndoorTellerQueueSize = Math.max(this.maxIndoorTellerQueueSize, stats.maxIndoorTellerQueueSize);
         this.maxOutdoorTellerQueueSize = Math.max(this.maxOutdoorTellerQueueSize, stats.maxOutdoorTellerQueueSize);
@@ -225,7 +141,7 @@ public class SimulationStatistics {
         sb.append(String.format(format, "totalServiceServiceTime", totalServiceServiceTime));
         sb.append(String.format(format, "totalIndoorTellerWaitTime", totalIndoorTellerWaitTime));
         sb.append(String.format(format, "totalOutdoorTellerWaitTime", totalOutdoorTellerWaitTime));
-        sb.append(String.format(format, "totalServiceEmployeeWaitTime", totalServiceEmployeeWaitTime));
+        sb.append(String.format(format, "totalServiceEmployeeWaitTime", totalServiceWaitTime));
         sb.append(String.format(format, "maxIndoorTellerQueueSize", maxIndoorTellerQueueSize));
         sb.append(String.format(format, "maxOutdoorTellerQueueSize", maxOutdoorTellerQueueSize));
         sb.append(String.format(format, "maxServiceEmployeeQueueSize", maxServiceEmployeeQueueSize));

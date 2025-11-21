@@ -7,7 +7,7 @@ import java.util.*;
 public class Simulator {
     private int simulationDays = 10;
     private int simulationCustomersCount = 10;
-    private int simulationRetries = 10;
+    private int simulationRuns = 10;
 
     private final Random rand = new Random();
     private final SimulationConfigs configs = SimulationConfigs.instance;
@@ -30,13 +30,12 @@ public class Simulator {
     private List<Employee> indoorTellers;
     private List<Employee> serviceEmployees;
 
-    private SimulationStatistics firstRunStats;
-    private SimulationStatistics firstBatchStats;
-    private SimulationStatistics totalStats;
+    private SimulationData firstDayStats;
+    private SimulationData totalStats;
 
 
     private int currentTime = 0;
-    private SimulationStatistics currentStats;
+    private SimulationData currentStats;
 
     public Simulator() {
     }
@@ -48,39 +47,33 @@ public class Simulator {
         outdoorQueueCapacity = configs.getOutdoorQueueCapacity();
         timeBetweenArrivalDistribution = configs.getTimeBetweenArrivalDistribution();
 
-        totalStats = new SimulationStatistics();
-        firstRunStats = null;
-        firstBatchStats = null;
+        totalStats = new SimulationData();
+        firstDayStats = null;
 
-        for (int batch = 0; batch < simulationRetries; batch++) {
+        for (int runs = 0; runs < simulationRuns; runs++) {
             for (int day = 0; day < simulationDays; day++) {
-                if (batch == 0 && day == 0) {
+                if (runs == 0 && day == 0) {
                     shouldDispatchEvent = true;
                     runSingleSimulation();
                     shouldDispatchEvent = false;
-                    firstRunStats = currentStats;
+                    firstDayStats = currentStats;
                 } else {
                     runSingleSimulation();
                 }
+                totalStats = currentStats;
                 totalStats.merge(currentStats);
-            }
-            if (batch == 0) {
-                firstBatchStats = currentStats;
             }
         }
 
-        if (firstRunStats != null) {
-            firstRunStats.calculateStatistics();
-        }
-        if (firstBatchStats != null) {
-            firstBatchStats.calculateStatistics();
+        if (firstDayStats != null) {
+            firstDayStats.calculateStatistics();
         }
         totalStats.calculateStatistics();
     }
 
     private void runSingleSimulation() {
         currentTime = 0;
-        currentStats = new SimulationStatistics();
+        currentStats = new SimulationData();
 
         outdoorTellers = outdoorTellersData.stream().map(e -> new Employee(e, outdoorTellerQueue)).toList();
         indoorTellers = indoorTellersData.stream().map(e -> new Employee(e, indoorTellerQueue)).toList();
@@ -112,32 +105,23 @@ public class Simulator {
             }
         }
 
-        currentStats.setTotalTime(currentTime);
+        currentStats.totalTime = currentTime;
 
         outdoorTellers.forEach(e -> e.updateTotalIdle(currentTime));
-        currentStats.setTotalOutdoorTellerIdleTime(
-                outdoorTellers.stream()
-                        .map(Employee::getTotalIdle)
-                        .reduce(0, Integer::sum)
-        );
+        currentStats.totalOutdoorTellerIdleTime =
+                outdoorTellers.stream().map(Employee::getTotalIdle).reduce(0, Integer::sum);
 
         indoorTellers.forEach(e -> e.updateTotalIdle(currentTime));
-        currentStats.setTotalIndoorTellerIdleTime(
-                indoorTellers.stream()
-                        .map(Employee::getTotalIdle)
-                        .reduce(0, Integer::sum)
-        );
+        currentStats.totalIndoorTellerIdleTime =
+                indoorTellers.stream().map(Employee::getTotalIdle).reduce(0, Integer::sum);
 
         serviceEmployees.forEach(e -> e.updateTotalIdle(currentTime));
-        currentStats.setTotalServiceEmployeeIdleTime(
-                serviceEmployees.stream()
-                        .map(Employee::getTotalIdle)
-                        .reduce(0, Integer::sum)
-        );
+        currentStats.totalServiceEmployeeIdleTime =
+                serviceEmployees.stream().map(Employee::getTotalIdle).reduce(0, Integer::sum);
 
-        currentStats.setIndoorTellersCount(outdoorTellers.size());
-        currentStats.setOutdoorTellersCount(outdoorTellers.size());
-        currentStats.setServiceEmployeesCount(serviceEmployees.size());
+        currentStats.indoorTellersCount = indoorTellers.size();
+        currentStats.outdoorTellersCount = outdoorTellers.size();
+        currentStats.serviceEmployeesCount = serviceEmployees.size();
     }
 
     private void handleArrival(SimulationEvent event) {
@@ -162,11 +146,11 @@ public class Simulator {
             } else {
                 outdoorTellerQueue.offer(c);
                 printEvent(SimulationEventRecord.Type.QUEUE, event, "Joined outdoor queue");
-                currentStats.addOutdoorTellerWaitingCustomer();
-                currentStats.updateOutdoorTellerMaxQueueSize(outdoorTellerQueue.size());
+                currentStats.totalOutdoorTellerWaitingCustomers++;
+                currentStats.maxOutdoorTellerQueueSize = Math.max(outdoorTellerQueue.size(), currentStats.maxOutdoorTellerQueueSize);
             }
 
-            currentStats.addOutdoorTellerCustomer();
+            currentStats.totalOutdoorTellerCustomers++;
         }
     }
 
@@ -178,11 +162,11 @@ public class Simulator {
         } else {
             indoorTellerQueue.offer(c);
             printEvent(SimulationEventRecord.Type.QUEUE, event, "Joined indoor teller queue");
-            currentStats.addIndoorTellerWaitingCustomer();
-            currentStats.updateIndoorTellerMaxQueueSize(indoorTellerQueue.size());
+            currentStats.totalIndoorTellerWaitingCustomers++;
+            currentStats.maxIndoorTellerQueueSize = Math.max(indoorTellerQueue.size(), currentStats.maxIndoorTellerQueueSize);
         }
 
-        currentStats.addIndoorTellerCustomer();
+        currentStats.totalIndoorTellerCustomers++;
     }
 
     private void routeToServiceEmployee(SimulationEvent event) {
@@ -193,11 +177,11 @@ public class Simulator {
         } else {
             serviceEmployeeQueue.offer(c);
             printEvent(SimulationEventRecord.Type.QUEUE, event, "Joined service employee queue");
-            currentStats.addServiceEmployeeWaitingCustomer();
-            currentStats.updateServiceEmployeeMaxQueueSize(serviceEmployeeQueue.size());
+            currentStats.totalServiceEmployeeWaitingCustomers++;
+            currentStats.maxServiceEmployeeQueueSize = Math.max(serviceEmployeeQueue.size(), currentStats.maxServiceEmployeeQueueSize);
         }
 
-        currentStats.addServiceEmployeeCustomer();
+        currentStats.totalServiceEmployeeCustomers++;
     }
 
     private void serveCustomer(Customer customer, Employee employee) {
@@ -209,15 +193,15 @@ public class Simulator {
         int departureTime = currentTime + serviceTime;
 
         if (employeeData.getType() == ServiceType.CASH) {
-            currentStats.addTotalCashServiceTime(serviceTime);
+            currentStats.totalCashServiceTime += serviceTime;
             if (employeeData.getArea() == EmployeeData.Area.OUTDOOR) {
-                currentStats.addTotalOutdoorTellerWaitTime(currentTime - customer.arrivalTime());
+                currentStats.totalOutdoorTellerWaitTime += currentTime - customer.arrivalTime();
             } else {
-                currentStats.addTotalIndoorTellerWaitTime(currentTime - customer.arrivalTime());
+                currentStats.totalIndoorTellerWaitTime += currentTime - customer.arrivalTime();
             }
         } else {
-            currentStats.addTotalServiceServiceTime(serviceTime);
-            currentStats.addTotalServiceEmployeeWaitTime(currentTime - customer.arrivalTime());
+            currentStats.totalServiceServiceTime += serviceTime;
+            currentStats.totalServiceWaitTime += currentTime - customer.arrivalTime();
         }
 
         SimulationEvent event = new SimulationEvent(SimulationEvent.Type.DEPARTURE, departureTime, customer, employee);
@@ -267,8 +251,8 @@ public class Simulator {
         }
     }
 
-    public void setSimulationRetries(int simulationRetries) {
-        this.simulationRetries = simulationRetries;
+    public void setSimulationRuns(int simulationRuns) {
+        this.simulationRuns = simulationRuns;
     }
 
     public void setSimulationCustomersCount(int simulationCustomersCount) {
@@ -279,15 +263,11 @@ public class Simulator {
         this.simulationDays = simulationDays;
     }
 
-    public SimulationStatistics getTotalStats() {
+    public SimulationData getTotalStats() {
         return totalStats;
     }
 
-    public SimulationStatistics getFirstBatchStats() {
-        return firstBatchStats;
-    }
-
-    public SimulationStatistics getFirstRunStats() {
-        return firstRunStats;
+    public SimulationData getFirstDayStats() {
+        return firstDayStats;
     }
 }

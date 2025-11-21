@@ -19,8 +19,7 @@ public class SimulationPageController {
     private final SimulationHistoryStorage historyStorage = new SimulationHistoryStorage();
     private Map<String, JTextField> simulationParameters;
     private final SimulationEventsTable simulationEventsTable = new SimulationEventsTable();
-    private final SimulationStatisticsTable firstRunStatsTable = new SimulationStatisticsTable();
-    private final SimulationStatisticsTable firstBatchStatsTable = new SimulationStatisticsTable();
+    private final SimulationStatisticsTable firstDayStatsTable = new SimulationStatisticsTable();
     private final SimulationStatisticsTable totalStatsTable = new SimulationStatisticsTable();
 
     public SimulationPageController(SimulationPage view) {
@@ -51,7 +50,7 @@ public class SimulationPageController {
 
             simulator.setSimulationCustomersCount(customersPerDay);
             simulator.setSimulationDays(days);
-            simulator.setSimulationRetries(runs);
+            simulator.setSimulationRuns(runs);
         } catch (NumberFormatException e) {
             showErrorMessage("Please enter valid whole numbers for all simulation parameters.");
             return;
@@ -59,17 +58,14 @@ public class SimulationPageController {
 
         simulator.startSimulation();
 
-        var firstRunStats = simulator.getFirstRunStats().getStatistics();
-        var firstBatchStats = simulator.getFirstBatchStats().getStatistics();
+        var firstDayStats = simulator.getFirstDayStats().getStatistics();
         var totalStats = simulator.getTotalStats().getStatistics();
 
-        firstRunStatsTable.setStatistics(firstRunStats);
-        firstBatchStatsTable.setStatistics(firstBatchStats);
+        firstDayStatsTable.setStatistics(firstDayStats);
         totalStatsTable.setStatistics(totalStats);
 
-        view.addDataTable("First Run's Simulation Events", simulationEventsTable, 400);
-        view.addDataTable("First Run Statistics", firstRunStatsTable, 300);
-        view.addDataTable("First Batch Statistics", firstBatchStatsTable, 300);
+        view.addDataTable("First Day's Simulation Events", simulationEventsTable, 400);
+        view.addDataTable("First Day's Statistics", firstDayStatsTable, 300);
         view.addDataTable("Total Statistics", totalStatsTable, 300);
 
 
@@ -145,8 +141,7 @@ public class SimulationPageController {
             SimulationHistoryRecord record = new SimulationHistoryRecord(
                     null,
                     events,
-                    new ArrayList<>(simulator.getFirstRunStats().getStatistics()),
-                    new ArrayList<>(simulator.getFirstBatchStats().getStatistics()),
+                    new ArrayList<>(simulator.getFirstDayStats().getStatistics()),
                     new ArrayList<>(simulator.getTotalStats().getStatistics()),
                     configSnapshot,
                     params

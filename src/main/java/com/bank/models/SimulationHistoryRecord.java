@@ -1,6 +1,6 @@
 package com.bank.models;
 
-import com.bank.simulation.SimulationStatistics;
+import com.bank.simulation.SimulationData;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -17,26 +17,23 @@ public class SimulationHistoryRecord implements Serializable {
     private String id;
     private LocalDateTime timestamp;
     private final List<EventRow> events;
-    private final List<SimulationStatistics.Statistic> firstRunStats;
-    private final List<SimulationStatistics.Statistic> firstBatchStats;
-    private final List<SimulationStatistics.Statistic> totalStats;
+    private final List<SimulationData.Statistic> firstDayStats;
+    private final List<SimulationData.Statistic> totalStats;
     private final SimulationConfigSnapshot configSnapshot;
     private final SimulationParams simulationParams;
 
     public SimulationHistoryRecord(
             LocalDateTime timestamp,
             List<EventRow> events,
-            List<SimulationStatistics.Statistic> firstRunStats,
-            List<SimulationStatistics.Statistic> firstBatchStats,
-            List<SimulationStatistics.Statistic> totalStats,
+            List<SimulationData.Statistic> firstDayStats,
+            List<SimulationData.Statistic> totalStats,
             SimulationConfigSnapshot configSnapshot,
             SimulationParams simulationParams
     ) {
         this.id = UUID.randomUUID().toString();
         this.timestamp = timestamp == null ? LocalDateTime.now() : timestamp;
         this.events = new ArrayList<>(events);
-        this.firstRunStats = new ArrayList<>(firstRunStats);
-        this.firstBatchStats = new ArrayList<>(firstBatchStats);
+        this.firstDayStats = new ArrayList<>(firstDayStats);
         this.totalStats = new ArrayList<>(totalStats);
         this.configSnapshot = configSnapshot;
         this.simulationParams = simulationParams;
@@ -58,15 +55,11 @@ public class SimulationHistoryRecord implements Serializable {
         return new ArrayList<>(events);
     }
 
-    public List<SimulationStatistics.Statistic> getFirstRunStats() {
-        return new ArrayList<>(firstRunStats);
+    public List<SimulationData.Statistic> getFirstDayStats() {
+        return new ArrayList<>(firstDayStats);
     }
 
-    public List<SimulationStatistics.Statistic> getFirstBatchStats() {
-        return new ArrayList<>(firstBatchStats);
-    }
-
-    public List<SimulationStatistics.Statistic> getTotalStats() {
+    public List<SimulationData.Statistic> getTotalStats() {
         return new ArrayList<>(totalStats);
     }
 

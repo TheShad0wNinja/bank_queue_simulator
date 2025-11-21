@@ -82,19 +82,14 @@ public class HistoryDetailPageController {
                     event.action()
             );
         }
-        view.addDataTable("First Run's Simulation Events", eventsTable, 400);
+        view.addDataTable("First Day's Simulation Events", eventsTable, 400);
 
-        var firstRunStats = record.getFirstRunStats();
-        var firstBatchStats = record.getFirstBatchStats();
+        var firstDayStats = record.getFirstDayStats();
         var totalStats = record.getTotalStats();
 
-        SimulationStatisticsTable firstRunStatsTable = new SimulationStatisticsTable();
-        firstRunStatsTable.setStatistics(new ArrayList<>(firstRunStats));
-        view.addDataTable("First Run Statistics", firstRunStatsTable, 300);
-
-        SimulationStatisticsTable firstBatchStatsTable = new SimulationStatisticsTable();
-        firstBatchStatsTable.setStatistics(new ArrayList<>(firstBatchStats));
-        view.addDataTable("First Batch Statistics", firstBatchStatsTable, 300);
+        SimulationStatisticsTable firstDayStatsTable = new SimulationStatisticsTable();
+        firstDayStatsTable.setStatistics(new ArrayList<>(firstDayStats));
+        view.addDataTable("First Day Statistics", firstDayStatsTable, 300);
 
         SimulationStatisticsTable totalStatsTable = new SimulationStatisticsTable();
         totalStatsTable.setStatistics(new ArrayList<>(totalStats));
