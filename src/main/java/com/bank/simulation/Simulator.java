@@ -33,7 +33,6 @@ public class Simulator {
     private SimulationData firstDayStats;
     private SimulationData totalStats;
 
-
     private int currentTime = 0;
     private SimulationData currentStats;
 
@@ -61,7 +60,6 @@ public class Simulator {
                 } else {
                     runSingleSimulation();
                 }
-                totalStats = currentStats;
                 totalStats.merge(currentStats);
             }
         }
@@ -83,6 +81,8 @@ public class Simulator {
         for (int i = 0; i < simulationCustomersCount; i++) {
             int timeBetweenCustomer = timeBetweenArrivalDistribution.getProbabilityValue(rand.nextDouble());
             int arrivalTime = currentTime + timeBetweenCustomer;
+
+            currentStats.totalInterArrivalTime += timeBetweenCustomer;
 
             ServiceType serviceType = rand.nextDouble() <= configs.getCashCustomerProbability()
                     ? ServiceType.CASH : ServiceType.SERVICE;
@@ -235,8 +235,7 @@ public class Simulator {
                 indoorTellerQueue.size(),
                 outdoorTellerQueue.size(),
                 serviceEmployeeQueue.size(),
-                currentTime
-        );
+                currentTime);
         dispatch(eventRecord);
     }
 
