@@ -41,6 +41,7 @@ public class Simulator {
     }
 
     public void startSimulation() {
+        rand.setSeed(System.currentTimeMillis());
         outdoorTellersData = configs.getOutdoorCashEmployeesData();
         indoorTellersData = configs.getIndoorCashEmployeesData();
         serviceEmployeesData = configs.getIndoorServiceEmployeesData();
