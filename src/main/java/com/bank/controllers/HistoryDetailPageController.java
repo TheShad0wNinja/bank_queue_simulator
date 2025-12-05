@@ -55,13 +55,12 @@ public class HistoryDetailPageController {
         for (var entry : grouped.entrySet()) {
             for (int i = 0; i < entry.getValue().size(); i++) {
                 SimulationHistoryRecord.EmployeeConfigSnapshot emp = entry.getValue().get(i);
-                String label = TextUtils.capitalize(
-                        String.join(" ",
-                                Arrays.stream(entry.getKey().split("_"))
-                                        .map(str -> str.matches("-?\\d+(\\.\\d+)?")
-                                                ? String.valueOf(Integer.parseInt(str) + 1)
-                                                : str)
-                                        .toList())) + " " + (i + 1);
+                String employeeType = switch(emp.getType()) {
+                    case "CASH" -> "teller";
+                    case "SERVICE" -> "service";
+                    default -> "employee";
+                };
+                String label = TextUtils.capitalize(emp.getArea().toLowerCase()) + " " + TextUtils.capitalize(employeeType) + " " + (i + 1);
 
                 ProbabilitiesTable table = new ProbabilitiesTable(emp.getServiceTimeProbabilities());
                 table.setEnabled(false);
